@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export function PageHeader() {
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-4">
+    <div className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 px-4 py-4 shadow-sm backdrop-blur-xl">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <button 
           onClick={(e) => {
@@ -14,7 +14,7 @@ export function PageHeader() {
             e.stopPropagation();
             window.location.replace('/');
           }}
-          className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer z-50 relative"
+          className="relative z-50 inline-flex cursor-pointer items-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md"
           type="button"
           style={{ pointerEvents: 'auto' }}
         >

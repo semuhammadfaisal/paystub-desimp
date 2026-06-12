@@ -244,11 +244,8 @@ function calculateFederalTax(
 function calculateSocialSecurityTax(grossPay: number, ytdGrossPay: number = 0): number {
   const SOCIAL_SECURITY_RATE = 0.062 // 6.2%
   
-  console.log('SS Tax calculation:', { grossPay, ytdGrossPay, SOCIAL_SECURITY_WAGE_BASE })
-  
   // Check if YTD earnings have exceeded the wage base
   if (ytdGrossPay >= SOCIAL_SECURITY_WAGE_BASE) {
-    console.log('YTD exceeds SS wage base, returning 0')
     return 0 // No more Social Security tax for the year
   }
   
@@ -257,11 +254,8 @@ function calculateSocialSecurityTax(grossPay: number, ytdGrossPay: number = 0): 
   const taxableAmount = Math.min(grossPay, remainingWageBase)
   const result = taxableAmount * SOCIAL_SECURITY_RATE
   
-  console.log('SS Tax result:', { remainingWageBase, taxableAmount, result })
-  
   // Ensure we return a valid number
   if (isNaN(result) || result < 0) {
-    console.log('SS Tax result is invalid, returning 0')
     return 0
   }
   
@@ -302,19 +296,10 @@ function calculateStateTax(annualIncome: number, taxState: string): number {
   const normalizedState = taxState?.toUpperCase() || ''
   const stateRate = STATE_TAX_RATES[normalizedState] || 0
   
-  console.log('State tax calculation:', { 
-    originalState: taxState,
-    normalizedState, 
-    stateRate, 
-    annualIncome, 
-    result: annualIncome * stateRate 
-  })
-  
   const result = annualIncome * stateRate
   
   // Ensure we return a valid number
   if (isNaN(result) || result < 0) {
-    console.log('State tax result is invalid, returning 0')
     return 0
   }
   
@@ -325,8 +310,6 @@ function calculateStateTax(annualIncome: number, taxState: string): number {
  * Main tax calculation function
  */
 export function calculateTaxes(input: TaxCalculationInput): TaxCalculationResult {
-  console.log('calculateTaxes called with input:', input)
-  
   const {
     grossPay,
     payFrequency,
@@ -340,9 +323,6 @@ export function calculateTaxes(input: TaxCalculationInput): TaxCalculationResult
   const annualMultiplier = getAnnualMultiplier(payFrequency)
   const annualIncome = grossPay * annualMultiplier
   
-  console.log('Annual multiplier:', annualMultiplier, 'Annual income:', annualIncome)
-  console.log('Calculating taxes for grossPay:', grossPay, 'ytdGrossPay:', ytdGrossPay)
-  
   // Calculate federal income tax (annual amount divided by pay periods)
   const annualFederalTax = calculateFederalTax(annualIncome, maritalStatus, exemptions)
   const federalTax = annualFederalTax / annualMultiplier
@@ -353,7 +333,6 @@ export function calculateTaxes(input: TaxCalculationInput): TaxCalculationResult
   
   // Calculate Social Security tax
   const socialSecurity = calculateSocialSecurityTax(grossPay, ytdGrossPay)
-  console.log('Social Security calculation:', { grossPay, ytdGrossPay, socialSecurity })
   
   // Calculate Medicare taxes
   const { medicare, additionalMedicare } = calculateMedicareTax(
@@ -361,8 +340,6 @@ export function calculateTaxes(input: TaxCalculationInput): TaxCalculationResult
     annualIncome, 
     maritalStatus
   )
-  console.log('Medicare calculation:', { medicare, additionalMedicare })
-  console.log('State tax calculation:', { taxState, annualStateTax, stateTax: annualStateTax / annualMultiplier })
   
   // Calculate State Disability (SDI/TDI/PFL) where applicable
   const stateDisability = calculateStateDisability(grossPay, payFrequency, taxState, ytdGrossPay)
@@ -382,7 +359,6 @@ export function calculateTaxes(input: TaxCalculationInput): TaxCalculationResult
     netPay: Math.round(netPay * 100) / 100
   }
   
-  console.log('Tax calculation result:', result)
   return result
 }
 

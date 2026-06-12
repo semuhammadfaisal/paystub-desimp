@@ -94,14 +94,14 @@ export function ClassicPreview({ data }: TemplateProps) {
           <h3 className="font-bold mb-2 border-b border-gray-400" style={{ color: accent }}>DEDUCTIONS</h3>
           <div className="space-y-1">
             <div className="flex justify-between"><span>Federal Tax</span><span className="calc-val">{formatCurrency(data.federalTax || 0)}</span></div>
-            {(data.stateTax && data.stateTax > 0) && (
+            {(data.stateTax || 0) > 0 ? (
               <div className="flex justify-between"><span>State Tax</span><span className="calc-val">{formatCurrency(data.stateTax || 0)}</span></div>
-            )}
+            ) : null}
             <div className="flex justify-between"><span>Social Security</span><span className="calc-val">{formatCurrency(data.socialSecurity || 0)}</span></div>
             <div className="flex justify-between"><span>Medicare</span><span className="calc-val">{formatCurrency(data.medicare || 0)}</span></div>
-            {(data.stateDisability && data.stateDisability > 0) && (
+            {(data.stateDisability || 0) > 0 ? (
               <div className="flex justify-between"><span>{((data.taxState || '').toUpperCase() === 'HI') ? 'TDI' : 'State Disability'}</span><span className="calc-val">{formatCurrency(data.stateDisability || 0)}</span></div>
-            )}
+            ) : null}
             <div className="flex justify-between font-bold border-t border-gray-400 pt-1"><span>TOTAL DEDUCTIONS</span><span className="calc-val">{formatCurrency(data.totalDeductions)}</span></div>
           </div>
         </div>

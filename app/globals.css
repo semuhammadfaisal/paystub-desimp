@@ -118,8 +118,167 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-saas), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-rendering: optimizeLegibility;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-saas), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-saas), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: rgb(17 24 39);
+    font-weight: 640 !important;
+    line-height: 1.08;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: clamp(2.75rem, 5vw, 4.75rem);
+    line-height: 1.03;
+    font-weight: 680 !important;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 3.2vw, 3.25rem);
+    font-weight: 650 !important;
+  }
+
+  h3 {
+    font-size: clamp(1.25rem, 1.7vw, 1.75rem);
+    line-height: 1.16;
+    font-weight: 620 !important;
+  }
+
+  p {
+    line-height: 1.7;
+    text-wrap: pretty;
+  }
+
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  label {
+    font-family: inherit;
+  }
+
+  button,
+  [role="button"] {
+    letter-spacing: 0;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre,
+  .font-mono {
+    font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+}
+
+@layer components {
+  .saas-shell {
+    @apply bg-white text-gray-900;
+    background-image:
+      linear-gradient(to bottom, rgba(35, 155, 160, 0.06), rgba(255, 255, 255, 0) 360px),
+      linear-gradient(to right, rgba(224, 224, 224, 0.4) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(224, 224, 224, 0.4) 1px, transparent 1px);
+    background-size: auto, 48px 48px, 48px 48px;
+  }
+
+  .home-shell {
+    @apply bg-white text-gray-900;
+    background:
+      linear-gradient(to right, rgba(224, 224, 224, 0.35) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(224, 224, 224, 0.35) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(35, 155, 160, 0.08), rgba(255, 255, 255, 0) 34rem),
+      #ffffff;
+    background-size: 56px 56px, 56px 56px, auto, auto;
+  }
+
+  .home-frame {
+    @apply mx-auto max-w-[1480px] overflow-hidden border-x border-gray-200 bg-white shadow-sm;
+  }
+
+  .saas-section {
+    @apply relative py-20 sm:py-24;
+  }
+
+  .saas-container {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .saas-card {
+    @apply rounded-3xl border border-gray-200 bg-white shadow-sm transition-all duration-300;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 24px 70px rgba(15, 23, 42, 0.07);
+  }
+
+  .saas-card-hover {
+    @apply hover:-translate-y-1 hover:border-primary/30;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 24px 70px rgba(15, 23, 42, 0.07);
+  }
+
+  .saas-card-hover:hover {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 34px 90px rgba(15, 23, 42, 0.11);
+  }
+
+  .section-kicker {
+    @apply mb-3 text-center text-xs font-bold uppercase tracking-[0.18em] text-primary;
+  }
+
+  .section-title {
+    @apply mx-auto max-w-3xl text-center text-3xl font-semibold tracking-tight text-gray-950 md:text-5xl;
+  }
+
+  .section-copy {
+    @apply mx-auto mt-5 max-w-3xl text-center text-lg leading-8 text-gray-600;
+  }
+
+  .saas-field {
+    @apply h-11 rounded-lg border-gray-300 bg-white px-3 text-sm shadow-sm transition-all duration-200 placeholder:text-gray-400 hover:border-primary/60 focus-visible:border-primary focus-visible:ring-primary/20;
+  }
+
+  .saas-label {
+    @apply text-sm font-semibold text-gray-700;
+  }
+
+  .saas-table {
+    @apply overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm;
+  }
+
+  .paystub-form-surface [data-slot="input"],
+  .paystub-form-surface [data-slot="select-trigger"] {
+    @apply min-h-11 rounded-lg border-gray-300 bg-white shadow-sm hover:border-primary/60 focus-visible:border-primary focus-visible:ring-primary/20;
+  }
+
+  .paystub-form-surface [data-slot="toggle-group-item"] {
+    @apply min-h-10 transition-all duration-200;
+  }
+
+  .paystub-form-surface table thead tr {
+    @apply bg-gray-50;
+  }
+
+  .paystub-form-surface table th {
+    @apply whitespace-nowrap;
+  }
+
+  .paystub-form-surface table tbody tr {
+    @apply transition-colors hover:bg-gray-50/70;
   }
 }
 
@@ -130,6 +289,17 @@
 .preview-blur .calc-val {
   filter: none !important;
 }
+
+#paystub-preview-capture.preview-blur #paystub-capture-target[data-template="jose-06-05"] .calc-val,
+#paystub-preview-capture.preview-blur #paystub-capture-target[data-template="stefanie-05-22"] .calc-val,
+#paystub-preview-capture.preview-blur #paystub-capture-target[data-template="spencer-05-15"] .calc-val,
+#paystub-preview-capture.preview-blur #paystub-capture-target[data-template="alyssa-03-27"] .calc-val,
+#paystub-preview-capture.preview-blur #paystub-capture-target[data-template="charles-04-01"] .calc-val,
+#paystub-preview-capture.preview-blur #paystub-capture-target[data-template="ktownes-stubs"] .calc-val,
+#paystub-preview-capture.preview-blur #paystub-capture-target[data-template="hector-cintron"] .calc-val {
+  filter: blur(6px) !important;
+}
+
 .preview-blur .blur-taxes .calc-val {
   filter: blur(6px) !important;
 }

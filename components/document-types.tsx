@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 export function DocumentTypes() {
   const documents = [
@@ -29,33 +30,34 @@ export function DocumentTypes() {
   ]
 
   return (
-    <section id="documents" className="relative bg-gradient-to-br from-slate-50 via-white to-blue-50/30 py-24 overflow-hidden">
-      {/* Enhanced background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(35,155,160,0.05),transparent_70%)]"></div>
-      </div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
+    <section id="documents" className="border-y border-gray-200 bg-gray-50/60 py-12 sm:py-14">
+      <div className="saas-container">
+        <div className="mx-auto mb-10 max-w-3xl text-center">
+          <div className="section-kicker">Documents</div>
+          <h2 className="section-title">
             Professional
-            <span className="block text-transparent bg-gradient-to-r from-primary to-secondary bg-clip-text">
+            <span className="block text-primary">
               Documents
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">Create stunning, bank-ready financial documents in minutes with our premium templates</p>
+          <p className="section-copy">Create stunning, bank-ready financial documents in minutes with our premium templates</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
           {documents.map((doc, index) => (
-            <div key={index} className="group aspect-square bg-white rounded-2xl shadow-lg hover:shadow-2xl border border-gray-200 hover:border-primary/50 p-4 transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
-              <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary text-center mb-3 transition-colors duration-300">{doc.title}</h3>
-              <div className="flex-1 flex items-center justify-center mb-3">
-                <img src={doc.image} alt={doc.title} className="max-w-full max-h-full object-contain transform group-hover:scale-105 transition-transform duration-300" />
+            <div key={index} className="saas-card saas-card-hover group flex min-h-[260px] flex-col p-4">
+              <h3 className="mb-3 text-center text-lg font-bold text-gray-900 transition-colors duration-300 group-hover:text-primary">{doc.title}</h3>
+              <div className="mb-3 flex flex-1 items-center justify-center rounded-xl bg-gray-50 p-3">
+                <Image
+                  src={doc.image}
+                  alt={doc.title}
+                  width={320}
+                  height={320}
+                  sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+                  className="max-h-32 max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                />
               </div>
-              <Link href={doc.href} className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white text-center py-2 rounded-lg font-semibold transition-all duration-300 block">
+              <Link href={doc.href} className="block rounded-lg bg-primary py-2 text-center font-semibold text-white transition-all duration-300 hover:bg-primary/90">
                 {doc.cta} →
               </Link>
             </div>

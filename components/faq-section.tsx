@@ -28,28 +28,22 @@ export function FaqSection() {
   ]
 
   return (
-    <section id="faq" className="relative py-24 bg-gradient-to-br from-slate-50 via-white to-blue-50/20 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary/5 rounded-full blur-3xl"></div>
-      </div>
-      
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
+    <section id="faq" className="saas-section border-y border-gray-200 bg-gray-50/70">
+      <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-12 text-center">
+          <div className="section-kicker">FAQ</div>
+          <h2 className="section-title">
             Frequently Asked 
-            <span className="text-transparent bg-gradient-to-r from-primary to-secondary bg-clip-text">
+            <span className="text-primary">
               Questions
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="section-copy">
             Find answers to common questions about our document services
           </p>
-          <div className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-6 rounded-full"></div>
         </div>
         
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+        <div className="saas-card overflow-hidden">
           <Accordion type="multiple" className="divide-y divide-gray-100">
             {faqs.map((f, idx) => (
               <AccordionItem key={idx} value={`item-${idx}`} className="border-0">

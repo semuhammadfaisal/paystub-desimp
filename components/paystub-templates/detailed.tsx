@@ -116,20 +116,20 @@ export function DetailedPreview({ data }: TemplateProps) {
                   <div className="w-[80px] text-right pr-5"><span className="calc-val">{formatCurrency(data.federalTax || 0)}</span></div>
                   <div className="w-[80px] text-right" style={{ color: '#666', fontSize: 13 }}><span className="calc-val">{formatCurrency(ytdFederal || 0)}</span></div>
                 </div>
-                {(data.stateTax && data.stateTax > 0) && (
+                {(data.stateTax || 0) > 0 ? (
                   <div className="flex border-b border-gray-100 py-1">
                     <div className="flex-1">State Tax</div>
                     <div className="w-[80px] text-right pr-5"><span className="calc-val">{formatCurrency(data.stateTax || 0)}</span></div>
                     <div className="w-[80px] text-right" style={{ color: '#666', fontSize: 13 }}><span className="calc-val">{formatCurrency(ytdState || 0)}</span></div>
                   </div>
-                )}
-                {(data.stateDisability && data.stateDisability > 0) && (
+                ) : null}
+                {(data.stateDisability || 0) > 0 ? (
                   <div className="flex border-b border-gray-100 py-1">
                     <div className="flex-1">{stateDisabilityLabel}</div>
                     <div className="w-[80px] text-right pr-5"><span className="calc-val">{formatCurrency(data.stateDisability || 0)}</span></div>
                     <div className="w-[80px] text-right" style={{ color: '#666', fontSize: 13 }}><span className="calc-val">{formatCurrency(ytdSDI || 0)}</span></div>
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
             <div className="w-[80px] px-3 py-1 border-r border-gray-200 text-right"></div>

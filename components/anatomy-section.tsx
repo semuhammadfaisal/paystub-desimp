@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import Image from "next/image"
 
 export function AnatomySection() {
@@ -14,47 +13,40 @@ export function AnatomySection() {
   ]
 
   return (
-    <section id="anatomy" className="relative py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50/20 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -right-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-secondary/5 rounded-full blur-3xl"></div>
-      </div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
+    <section id="anatomy" className="saas-section border-y border-gray-200 bg-gray-50/70">
+      <div className="saas-container">
+        <div className="mb-16 text-center">
+          <div className="section-kicker">Anatomy</div>
+          <h2 className="section-title">
             The Anatomy of a 
-            <span className="text-transparent bg-gradient-to-r from-primary to-secondary bg-clip-text">
+            <span className="text-primary">
               Paystub
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
+          <p className="section-copy">
             42% of U.S. employees say taxes and deductions on their paystubs are confusing. We're breaking down the key elements below so you can better understand your paystub.
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full"></div>
           
           {/* Paystub Anatomy Visual */}
           <div className="relative max-w-5xl mx-auto mt-12 mb-16">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200">
+            <div className="saas-card relative overflow-hidden p-3">
               <Image
                 src="/downimage.jpg"
                 alt="The Anatomy of a Paystub - Visual breakdown showing Employment Details, Gross Salary, Taxes, Net Salary, and other key components"
                 width={800}
                 height={600}
-                className="w-full h-auto object-contain bg-white"
+                className="h-auto w-full rounded-xl bg-white object-contain"
                 priority
               />
             </div>
-            <div className="absolute -inset-6 -z-10 rounded-3xl bg-gradient-to-tr from-primary/20 to-secondary/20 blur-2xl"></div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {items.map((it, index) => (
-            <div key={it.title} className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl border border-gray-100 hover:border-primary/20 transition-all duration-500 transform hover:-translate-y-2">
+            <div key={it.title} className="saas-card saas-card-hover group p-6">
               {/* Number badge */}
-              <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-sm mb-4">
+              <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white">
                 {index + 1}
               </div>
               
@@ -66,7 +58,7 @@ export function AnatomySection() {
               </p>
               
               {/* Decorative element */}
-              <div className="w-12 h-1 bg-gradient-to-r from-primary to-secondary rounded-full mt-4 transform scale-0 group-hover:scale-100 transition-transform duration-500"></div>
+              <div className="mt-4 h-1 w-12 scale-0 rounded-full bg-primary transition-transform duration-500 group-hover:scale-100"></div>
             </div>
           ))}
         </div>

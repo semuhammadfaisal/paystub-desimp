@@ -70,9 +70,40 @@ export interface PaystubData {
   ytd_net_pay?: number
 }
 
+const PDF_DEBUG = false
+const TRANSPARENT_GIF = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
+const debugLog = (...args: unknown[]) => {
+  if (PDF_DEBUG) console.log(...args)
+}
+const debugWarn = (...args: unknown[]) => {
+  if (PDF_DEBUG) console.warn(...args)
+}
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+const getCanvasScale = () => Math.min(4, Math.max(3, (window.devicePixelRatio || 1) * 2))
+const getExportElement = (container: HTMLElement) => {
+  return (container.querySelector('[data-pdf-page="true"]') as HTMLElement | null) || container
+}
+const createSinglePagePdfBlob = (canvas: HTMLCanvasElement) => {
+  const pdf = new jsPDF({ unit: "pt", format: "letter", compress: true })
+  const pageWidth = pdf.internal.pageSize.getWidth()
+  const pageHeight = pdf.internal.pageSize.getHeight()
+  const margin = 6
+  const usableWidth = pageWidth - margin * 2
+  const usableHeight = pageHeight - margin * 2
+  const scale = Math.min(usableWidth / canvas.width, usableHeight / canvas.height)
+  const imageWidth = canvas.width * scale
+  const imageHeight = canvas.height * scale
+  const x = (pageWidth - imageWidth) / 2
+  const y = (pageHeight - imageHeight) / 2
+  const imageData = canvas.toDataURL("image/png", 1.0)
+
+  pdf.addImage(imageData, "PNG", x, y, imageWidth, imageHeight, undefined, "NONE")
+  return pdf.output("blob") as Blob
+}
+
 export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
   return new Promise(async (resolve, reject) => {
-    console.log('PDF Generator: Starting PDF generation...')
+    debugLog('PDF Generator: Starting PDF generation...')
     
     // Use DOM snapshot of the on-screen preview so the PDF matches the selected template exactly.
     // In strict mode, if capture fails, do NOT fallback to an alternate layout — instead, surface an error.
@@ -81,10 +112,10 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
     if (true) {
       // 1) Try to capture the live preview so the PDF matches the on-screen template exactly
       try {
-        console.log('PDF Generator: Starting DOM snapshot attempt...')
+        debugLog('PDF Generator: Starting DOM snapshot attempt...')
         
         // Wait for any React renders to complete
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await nextFrame()
         
         // Retry helper to wait for preview container to mount
         const waitForElement = async (ids: string[], timeoutMs = 2500, intervalMs = 100): Promise<HTMLElement | null> => {
@@ -101,38 +132,39 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
 
         const container = await waitForElement(["paystub-capture-snapshot", "paystub-capture-target", "paystub-preview-capture"])
         if (!container) {
-          console.warn('PDF Generator: Capture target not found in DOM. Strict match enabled; aborting.')
-          console.log('PDF Generator: Available elements with IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id))
+          debugWarn('PDF Generator: Capture target not found in DOM. Strict match enabled; aborting.')
+          debugLog('PDF Generator: Available elements with IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id))
           throw new Error('Preview container not found')
         }
-        console.log('PDF Generator: Using capture element with id:', container.id)
-        console.log('PDF Generator: Capture element dimensions:', container.getBoundingClientRect())
-        console.log('PDF Generator: Capture element visibility:', getComputedStyle(container).visibility)
-        console.log('PDF Generator: Capture element display:', getComputedStyle(container).display)
+        debugLog('PDF Generator: Using capture element with id:', container.id)
+        debugLog('PDF Generator: Capture element dimensions:', container.getBoundingClientRect())
+        debugLog('PDF Generator: Capture element visibility:', getComputedStyle(container).visibility)
+        debugLog('PDF Generator: Capture element display:', getComputedStyle(container).display)
         // Determine which element to capture based on container type
         let primaryCaptureEl: HTMLElement
         if (container.id === 'paystub-capture-snapshot') {
           // Use the snapshot directly - it already contains the rendered template
-          primaryCaptureEl = container
+          primaryCaptureEl = getExportElement(container)
         } else if (container.id === 'paystub-capture-target') {
-          // Use the target directly - this is the main content area
-          primaryCaptureEl = container
+          // Prefer an inner fixed-size page when the target is a scroll/padding wrapper.
+          primaryCaptureEl = getExportElement(container)
         } else {
           // For paystub-preview-capture, look for the inner target element
-          primaryCaptureEl = (container.querySelector('#paystub-capture-target') as HTMLElement) || container
+          const target = (container.querySelector('#paystub-capture-target') as HTMLElement) || container
+          primaryCaptureEl = getExportElement(target)
         }
-        console.log('PDF Generator: Using capture element with id:', primaryCaptureEl.id || container.id)
+        debugLog('PDF Generator: Using capture element with id:', primaryCaptureEl.id || container.id)
       
-      console.log('PDF Generator: Found preview container, dimensions:', primaryCaptureEl.getBoundingClientRect())
+      debugLog('PDF Generator: Found preview container, dimensions:', primaryCaptureEl.getBoundingClientRect())
       
       // Wait a moment for any pending renders
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await nextFrame()
       
       // Ensure fonts/styles are ready before capture
       if ((document as any).fonts && typeof (document as any).fonts.ready?.then === 'function') {
-        console.log('PDF Generator: Waiting for fonts to be ready...')
+        debugLog('PDF Generator: Waiting for fonts to be ready...')
         try { await (document as any).fonts.ready } catch {}
-        console.log('PDF Generator: Fonts ready')
+        debugLog('PDF Generator: Fonts ready')
       }
 
         // Build off-screen clone to avoid layout shifts and to inline external images
@@ -160,7 +192,9 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
             const pos = style?.position || ''
             // Remove watermark-like overlays and grid backgrounds
             if (
-              (text === 'PREVIEW' && pos === 'absolute') ||
+              el.getAttribute('data-nonexport') === 'true' ||
+              el.hasAttribute('data-template-watermark') ||
+              ((text === 'PREVIEW' || text === 'PREVIEW ONLY') && pos === 'absolute') ||
               (bgImg.includes('repeating-linear-gradient') && (pos === 'absolute' || pos === 'fixed'))
             ) {
               el.remove()
@@ -168,10 +202,10 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
             }
           }
           if (removed > 0) {
-            console.log('PDF Generator: Sanitized clone DOM, removed nodes:', removed)
+            debugLog('PDF Generator: Sanitized clone DOM, removed nodes:', removed)
           }
         } catch (e) {
-          console.warn('PDF Generator: Sanitization step failed (continuing):', e)
+          debugWarn('PDF Generator: Sanitization step failed (continuing):', e)
         }
 
         // Additional sanitization: replace unsupported color functions like oklch() with computed RGB values
@@ -196,7 +230,7 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
             }
           }
         } catch (e) {
-          console.warn('PDF Generator: Color sanitization failed (continuing):', e)
+          debugWarn('PDF Generator: Color sanitization failed (continuing):', e)
         }
 
         // Helper: turn external images into data URLs so canvas is never tainted
@@ -207,12 +241,12 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
             return await new Promise<string>((resolve) => {
               const fr = new FileReader()
               fr.onload = () => resolve(fr.result as string)
-              fr.onerror = () => resolve('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==')
+              fr.onerror = () => resolve(TRANSPARENT_GIF)
               fr.readAsDataURL(blob)
             })
           } catch {
             // 1x1 transparent gif fallback
-            return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
+            return TRANSPARENT_GIF
           }
         }
 
@@ -227,16 +261,16 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
             }
           } catch {
             // If anything fails, blank the image to avoid taint
-            img.setAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==')
+            img.setAttribute('src', TRANSPARENT_GIF)
           }
         }))
 
         document.body.appendChild(cloneWrapper)
-        console.log('PDF Generator: Clone created and added to DOM, starting html2canvas...')
+        debugLog('PDF Generator: Clone created and added to DOM, starting html2canvas...')
 
-        const scale = Math.max(2, (window.devicePixelRatio || 1))
-        console.log('PDF Generator: Starting html2canvas with scale:', scale)
-        console.log('PDF Generator: Clone dimensions before capture:', clone.scrollWidth, 'x', clone.scrollHeight)
+        const scale = getCanvasScale()
+        debugLog('PDF Generator: Starting html2canvas with scale:', scale)
+        debugLog('PDF Generator: Clone dimensions before capture:', clone.scrollWidth, 'x', clone.scrollHeight)
 
         let previewCanvas
         try {
@@ -244,12 +278,14 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
             scale,
             useCORS: true,
             backgroundColor: '#ffffff',
-            logging: true,
-            imageTimeout: 0,
+            logging: PDF_DEBUG,
+            imageTimeout: 5000,
             ignoreElements: (el) => {
               try {
                 const e = el as HTMLElement
                 if (e?.getAttribute && e.getAttribute('data-decorative') === 'true') return true
+                if (e?.getAttribute && e.getAttribute('data-nonexport') === 'true') return true
+                if (e?.hasAttribute && e.hasAttribute('data-template-watermark')) return true
                 const cs = getComputedStyle(e)
                 const bgImg = cs?.backgroundImage || ''
                 const pos = cs?.position || ''
@@ -261,58 +297,23 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
             windowHeight: clone.scrollHeight,
             removeContainer: true,
           })
-          console.log('PDF Generator: html2canvas completed successfully, canvas size:', previewCanvas.width, 'x', previewCanvas.height)
+          debugLog('PDF Generator: html2canvas completed successfully, canvas size:', previewCanvas.width, 'x', previewCanvas.height)
           // Guard: if the canvas is zero-sized, treat as failure so we fall back to in-place capture
           if (!previewCanvas.width || !previewCanvas.height) {
             throw new Error('Clone capture produced zero-sized canvas')
           }
         } catch (error) {
-          console.error('PDF Generator: html2canvas failed:', error)
+          debugWarn('PDF Generator: html2canvas failed:', error)
           throw new Error(`html2canvas capture failed: ${error}`)
         }
 
-        const pdf = new jsPDF({ unit: "pt", format: "letter", compress: true })
-        const pageWidth = pdf.internal.pageSize.getWidth()
-        const pageHeight = pdf.internal.pageSize.getHeight()
-        const marginX = 24
-        const marginY = 24
-        const usableWidthPt = pageWidth - marginX * 2
-        const usableHeightPt = pageHeight - marginY * 2
-
-        // Calculate scaling so the image fills the width; we'll paginate by height.
-        const cW = previewCanvas.width
-        const cH = previewCanvas.height
-        const ptPerPx = usableWidthPt / cW
-        const pageSliceHeightPx = Math.floor(usableHeightPt / ptPerPx)
-
-        let offsetPx = 0
-        let pageIndex = 0
-        while (offsetPx < cH) {
-          const sliceHeightPx = Math.min(pageSliceHeightPx, cH - offsetPx)
-          // Create a slice canvas
-          const sliceCanvas = document.createElement('canvas')
-          sliceCanvas.width = cW
-          sliceCanvas.height = sliceHeightPx
-          const sctx = sliceCanvas.getContext('2d')!
-          sctx.drawImage(previewCanvas, 0, offsetPx, cW, sliceHeightPx, 0, 0, cW, sliceHeightPx)
-
-          const sliceImg = sliceCanvas.toDataURL('image/png', 1.0)
-          const sliceHeightPt = sliceHeightPx * ptPerPx
-
-          if (pageIndex > 0) pdf.addPage()
-          pdf.addImage(sliceImg, 'PNG', marginX, marginY, usableWidthPt, sliceHeightPt)
-
-          offsetPx += sliceHeightPx
-          pageIndex += 1
-        }
-
-        const pdfBlob = pdf.output('blob') as Blob
-        console.log('PDF Generator: PDF generated successfully via DOM snapshot')
+        const pdfBlob = createSinglePagePdfBlob(previewCanvas)
+        debugLog('PDF Generator: PDF generated successfully via DOM snapshot')
         try { if (cloneWrapper && cloneWrapper.parentNode) cloneWrapper.parentNode.removeChild(cloneWrapper) } catch {}
         resolve(pdfBlob)
         return
       } catch (err) {
-        console.warn("PDF Generator: DOM clone capture failed; retrying with in-place capture...", err)
+        debugWarn("PDF Generator: DOM clone capture failed; retrying with in-place capture...", err)
         try { const el = (document.getElementById('paystub-capture-snapshot') as HTMLDivElement | null); if (el && el.parentNode) el.parentNode.removeChild(el) } catch {}
         try {
           // Second attempt: capture the original element in place
@@ -322,11 +323,12 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
           // Determine which element to capture based on container type
           let primaryCaptureEl2: HTMLElement
           if (container2.id === 'paystub-capture-snapshot') {
-            primaryCaptureEl2 = container2
+            primaryCaptureEl2 = getExportElement(container2)
           } else if (container2.id === 'paystub-capture-target') {
-            primaryCaptureEl2 = container2
+            primaryCaptureEl2 = getExportElement(container2)
           } else {
-            primaryCaptureEl2 = (container2.querySelector('#paystub-capture-target') as HTMLElement) || container2
+            const target2 = (container2.querySelector('#paystub-capture-target') as HTMLElement) || container2
+            primaryCaptureEl2 = getExportElement(target2)
           }
 
           // Ensure fonts/styles are ready before capture
@@ -337,7 +339,7 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
           // Ensure the element is in view to avoid cases where layout yields zero size
           try { container2.scrollIntoView({ block: 'center', inline: 'nearest' }) } catch {}
           // Small wait in case of last-moment renders
-          await new Promise(resolve => setTimeout(resolve, 200))
+          await nextFrame()
 
           // Temporarily adjust container styles for stable layout during capture
           const prevContainer2 = {
@@ -359,7 +361,9 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
               const bgImg = cs.backgroundImage || ''
               const pos = cs.position || ''
               if (
-                (text === 'PREVIEW' && pos === 'absolute') ||
+                el.getAttribute('data-nonexport') === 'true' ||
+                el.hasAttribute('data-template-watermark') ||
+                ((text === 'PREVIEW' || text === 'PREVIEW ONLY') && pos === 'absolute') ||
                 (bgImg.includes('repeating-linear-gradient') && (pos === 'absolute' || pos === 'fixed'))
               ) {
                 hiddenEls.push({ el, prevDisplay: el.style.display || null })
@@ -376,11 +380,11 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
               return await new Promise<string>((resolve) => {
                 const fr = new FileReader()
                 fr.onload = () => resolve(fr.result as string)
-                fr.onerror = () => resolve('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==')
+                fr.onerror = () => resolve(TRANSPARENT_GIF)
                 fr.readAsDataURL(blob)
               })
             } catch {
-              return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
+              return TRANSPARENT_GIF
             }
           }
 
@@ -396,23 +400,25 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
                   img.setAttribute('src', dataUrl)
                 }
               } catch {
-                img.setAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==')
+                img.setAttribute('src', TRANSPARENT_GIF)
               }
             }))
           } catch {}
 
-          const scale2 = Math.max(2, (window.devicePixelRatio || 1))
+          const scale2 = getCanvasScale()
           const inPlaceCanvas = await html2canvas(primaryCaptureEl2, {
             scale: scale2,
             useCORS: true,
             backgroundColor: '#ffffff',
             logging: false,
             foreignObjectRendering: true,
-            imageTimeout: 0,
+            imageTimeout: 5000,
             ignoreElements: (el) => {
               try {
                 const e = el as HTMLElement
                 if (e?.getAttribute && e.getAttribute('data-decorative') === 'true') return true
+                if (e?.getAttribute && e.getAttribute('data-nonexport') === 'true') return true
+                if (e?.hasAttribute && e.hasAttribute('data-template-watermark')) return true
                 const cs = getComputedStyle(e)
                 const bgImg = cs?.backgroundImage || ''
                 const pos = cs?.position || ''
@@ -439,46 +445,15 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
           primaryCaptureEl2.style.transform = prevContainer2.transform
           primaryCaptureEl2.style.background = prevContainer2.background
 
-          const pdf = new jsPDF({ unit: "pt", format: "letter", compress: true })
-          const pageWidth = pdf.internal.pageSize.getWidth()
-          const pageHeight = pdf.internal.pageSize.getHeight()
-          const marginX = 24
-          const marginY = 24
-          const usableWidthPt = pageWidth - marginX * 2
-          const usableHeightPt = pageHeight - marginY * 2
-
           const cW = inPlaceCanvas.width
           const cH = inPlaceCanvas.height
           if (!cW || !cH) throw new Error('Preview has zero dimensions; is it hidden?')
-          const ptPerPx = usableWidthPt / cW
-          const pageSliceHeightPx = Math.floor(usableHeightPt / ptPerPx)
-
-          let offsetPx = 0
-          let pageIndex = 0
-          while (offsetPx < cH) {
-            const sliceHeightPx = Math.min(pageSliceHeightPx, cH - offsetPx)
-            const sliceCanvas = document.createElement('canvas')
-            sliceCanvas.width = cW
-            sliceCanvas.height = sliceHeightPx
-            const sctx = sliceCanvas.getContext('2d')!
-            sctx.drawImage(inPlaceCanvas, 0, offsetPx, cW, sliceHeightPx, 0, 0, cW, sliceHeightPx)
-
-            const sliceImg = sliceCanvas.toDataURL('image/png', 1.0)
-            const sliceHeightPt = sliceHeightPx * ptPerPx
-
-            if (pageIndex > 0) pdf.addPage()
-            pdf.addImage(sliceImg, 'PNG', marginX, marginY, usableWidthPt, sliceHeightPt)
-
-            offsetPx += sliceHeightPx
-            pageIndex += 1
-          }
-
-          const pdfBlob = pdf.output('blob') as Blob
-          console.log('PDF Generator: PDF generated successfully via in-place DOM capture')
+          const pdfBlob = createSinglePagePdfBlob(inPlaceCanvas)
+          debugLog('PDF Generator: PDF generated successfully via in-place DOM capture')
           resolve(pdfBlob)
           return
         } catch (err2) {
-          console.warn('PDF Generator: In-place capture also failed.', err2)
+          debugWarn('PDF Generator: In-place capture also failed.', err2)
           // Third attempt: in-place capture with alternate html2canvas options
           try {
             const container3 = (document.getElementById('paystub-capture-snapshot') || document.getElementById('paystub-capture-target') || document.getElementById('paystub-preview-capture')) as HTMLElement | null
@@ -487,17 +462,18 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
             // Determine which element to capture based on container type
             let primaryCaptureEl3: HTMLElement
             if (container3.id === 'paystub-capture-snapshot') {
-              primaryCaptureEl3 = container3
+              primaryCaptureEl3 = getExportElement(container3)
             } else if (container3.id === 'paystub-capture-target') {
-              primaryCaptureEl3 = container3
+              primaryCaptureEl3 = getExportElement(container3)
             } else {
-              primaryCaptureEl3 = (container3.querySelector('#paystub-capture-target') as HTMLElement) || container3
+              const target3 = (container3.querySelector('#paystub-capture-target') as HTMLElement) || container3
+              primaryCaptureEl3 = getExportElement(target3)
             }
 
             // Ensure visible and scrolled into view
             container3.style.visibility = 'visible'
             try { container3.scrollIntoView({ block: 'center', inline: 'nearest' }) } catch {}
-            await new Promise(resolve => setTimeout(resolve, 150))
+            await nextFrame()
 
             // Temporarily adjust container styles for stable layout during capture
             const prevContainer3 = {
@@ -519,7 +495,9 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
                 const bgImg = cs.backgroundImage || ''
                 const pos = cs.position || ''
                 if (
-                  (text === 'PREVIEW' && pos === 'absolute') ||
+                  el.getAttribute('data-nonexport') === 'true' ||
+                  el.hasAttribute('data-template-watermark') ||
+                  ((text === 'PREVIEW' || text === 'PREVIEW ONLY') && pos === 'absolute') ||
                   (bgImg.includes('repeating-linear-gradient') && (pos === 'absolute' || pos === 'fixed'))
                 ) {
                   hiddenEls3.push({ el, prevDisplay: el.style.display || null })
@@ -538,11 +516,11 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
                 return await new Promise<string>((resolve) => {
                   const fr = new FileReader()
                   fr.onload = () => resolve(fr.result as string)
-                  fr.onerror = () => resolve('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==')
+                  fr.onerror = () => resolve(TRANSPARENT_GIF)
                   fr.readAsDataURL(blob)
                 })
               } catch {
-                return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
+                return TRANSPARENT_GIF
               }
             }
             try {
@@ -555,12 +533,12 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
                     img.setAttribute('src', dataUrl)
                   }
                 } catch {
-                  img.setAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==')
+                  img.setAttribute('src', TRANSPARENT_GIF)
                 }
               }))
             } catch {}
 
-            const scale3 = Math.max(2, (window.devicePixelRatio || 1))
+            const scale3 = getCanvasScale()
             const altCanvas = await html2canvas(primaryCaptureEl3, {
               scale: scale3,
               useCORS: true,
@@ -570,11 +548,13 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
               foreignObjectRendering: false, // alternate renderer
               scrollX: 0,
               scrollY: -window.scrollY,
-              imageTimeout: 0,
+              imageTimeout: 5000,
               ignoreElements: (el) => {
                 try {
                   const e = el as HTMLElement
                   if (e?.getAttribute && e.getAttribute('data-decorative') === 'true') return true
+                  if (e?.getAttribute && e.getAttribute('data-nonexport') === 'true') return true
+                  if (e?.hasAttribute && e.hasAttribute('data-template-watermark')) return true
                   const cs = getComputedStyle(e)
                   const bgImg = cs?.backgroundImage || ''
                   const pos = cs?.position || ''
@@ -601,46 +581,15 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
             primaryCaptureEl3.style.transform = prevContainer3.transform
             primaryCaptureEl3.style.background = prevContainer3.background
 
-            const pdf = new jsPDF({ unit: 'pt', format: 'letter', compress: true })
-            const pageWidth = pdf.internal.pageSize.getWidth()
-            const pageHeight = pdf.internal.pageSize.getHeight()
-            const marginX = 24
-            const marginY = 24
-            const usableWidthPt = pageWidth - marginX * 2
-            const usableHeightPt = pageHeight - marginY * 2
-
             const cW = altCanvas.width
             const cH = altCanvas.height
             if (!cW || !cH) throw new Error('Alternate capture produced zero size')
-            const ptPerPx = usableWidthPt / cW
-            const pageSliceHeightPx = Math.floor(usableHeightPt / ptPerPx)
-
-            let offsetPx = 0
-            let pageIndex = 0
-            while (offsetPx < cH) {
-              const sliceHeightPx = Math.min(pageSliceHeightPx, cH - offsetPx)
-              const sliceCanvas = document.createElement('canvas')
-              sliceCanvas.width = cW
-              sliceCanvas.height = sliceHeightPx
-              const sctx = sliceCanvas.getContext('2d')!
-              sctx.drawImage(altCanvas, 0, offsetPx, cW, sliceHeightPx, 0, 0, cW, sliceHeightPx)
-
-              const sliceImg = sliceCanvas.toDataURL('image/png', 1.0)
-              const sliceHeightPt = sliceHeightPx * ptPerPx
-
-              if (pageIndex > 0) pdf.addPage()
-              pdf.addImage(sliceImg, 'PNG', marginX, marginY, usableWidthPt, sliceHeightPt)
-
-              offsetPx += sliceHeightPx
-              pageIndex += 1
-            }
-
-            const pdfBlob = pdf.output('blob') as Blob
-            console.log('PDF Generator: PDF generated successfully via alternate in-place capture')
+            const pdfBlob = createSinglePagePdfBlob(altCanvas)
+            debugLog('PDF Generator: PDF generated successfully via alternate in-place capture')
             resolve(pdfBlob)
             return
           } catch (err3) {
-            console.warn('PDF Generator: Alternate in-place capture also failed.', err3)
+            debugWarn('PDF Generator: Alternate in-place capture also failed.', err3)
             if (STRICT_MATCH) {
               return reject(new Error('Could not capture the on-screen preview for PDF after multiple attempts. Please ensure the preview is visible, avoid external blocked images, and try again.'))
             }
@@ -752,8 +701,8 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
     let logoWidth = 0
     let logoHeight = 0
     if (data.employer_logo) {
-      console.log('Logo data present, length:', data.employer_logo.length)
-      console.log('Logo data starts with:', data.employer_logo.substring(0, 50))
+      debugLog('Logo data present, length:', data.employer_logo.length)
+      debugLog('Logo data starts with:', data.employer_logo.substring(0, 50))
       
       // Create image element to load the logo
       const logoImg = new Image()
@@ -762,7 +711,7 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
       // Set up logo promise to handle async loading
       const logoPromise = new Promise<void>((resolve) => {
         logoImg.onload = () => {
-          console.log('Logo loaded successfully, dimensions:', logoImg.width, 'x', logoImg.height)
+          debugLog('Logo loaded successfully, dimensions:', logoImg.width, 'x', logoImg.height)
           // Calculate logo dimensions (max 64px height to match preview)
           const maxLogoHeight = 64
           const logoAspectRatio = logoImg.width / logoImg.height
@@ -773,7 +722,7 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
           const logoX = margin + 30
           const logoY = headerStartY
           
-          console.log('Drawing logo at:', logoX, logoY, 'size:', logoWidth, 'x', logoHeight)
+          debugLog('Drawing logo at:', logoX, logoY, 'size:', logoWidth, 'x', logoHeight)
           // Draw logo image
           ctx.drawImage(logoImg, logoX, logoY, logoWidth, logoHeight)
           resolve()
@@ -781,7 +730,7 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
         
         logoImg.onerror = () => {
           // If logo fails to load, just continue without it
-          console.warn('Logo failed to load:', data.employer_logo?.substring(0, 50) + '...')
+          debugWarn('Logo failed to load:', data.employer_logo?.substring(0, 50) + '...')
           resolve()
         }
         
@@ -790,9 +739,9 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
       
       // Wait for logo to load before continuing
       await logoPromise
-      console.log('Logo promise resolved')
+      debugLog('Logo promise resolved')
     } else {
-      console.log('No logo data present')
+      debugLog('No logo data present')
     }
     
     // Company info positioned next to logo (with gap)

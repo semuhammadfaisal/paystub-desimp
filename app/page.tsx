@@ -16,7 +16,7 @@ import { SupportSection } from "@/components/support-section"
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="home-shell min-h-screen">
       <Header />
       <main>
         <HeroSection />

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Download, X } from "lucide-react"
-import { generatePaystubPDF, downloadPDF, type PaystubData } from "@/lib/pdf-generator"
+import type { PaystubData } from "@/lib/pdf-generator"
 
 interface DocumentViewerProps {
   isOpen: boolean
@@ -21,8 +21,9 @@ export default function DocumentViewer({ isOpen, onClose, paystubData, title }: 
 
     setIsGenerating(true)
     try {
+      const { generatePaystubPDF, downloadPDF } = await import("@/lib/pdf-generator")
       const pdfBlob = await generatePaystubPDF(paystubData)
-      const filename = `paystub-${paystubData.employee_name.replace(/\s+/g, "-")}-${paystubData.pay_date}.png`
+      const filename = `paystub-${paystubData.employee_name.replace(/\s+/g, "-")}-${paystubData.pay_date}.pdf`
       downloadPDF(pdfBlob, filename)
     } catch (error) {
       console.error("Error generating PDF:", error)

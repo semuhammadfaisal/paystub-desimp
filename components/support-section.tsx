@@ -1,103 +1,92 @@
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { Mail, MapPin, Phone } from "lucide-react"
 
 export function SupportSection() {
   return (
-    <section id="support" className="relative py-24 bg-gradient-to-br from-primary/5 via-white to-secondary/5 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary/5 rounded-full blur-3xl"></div>
-      </div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Support Content */}
+    <section id="support" className="saas-section bg-white">
+      <div className="saas-container">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
           <div>
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
-              Get 
-              <span className="text-transparent bg-gradient-to-r from-primary to-secondary bg-clip-text">
-                Support
-              </span>
+            <div className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary">Support</div>
+            <h2 className="mb-6 text-4xl font-semibold tracking-tight text-gray-950 md:text-5xl">
+              Get <span className="text-primary">Support</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
+            <p className="mb-8 max-w-3xl text-xl leading-relaxed text-gray-600">
               Need help? Message us anytime or start a chat. We respond fast and are here to help you succeed.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/contact">
-                <button className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary text-white font-semibold px-8 py-4 rounded-2xl hover:opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                <button className="w-full rounded-2xl bg-primary px-8 py-4 font-semibold text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/25 sm:w-auto">
                   Send us a message
                 </button>
               </Link>
               <Link href="/contact">
-                <button className="w-full sm:w-auto bg-white text-primary border-2 border-primary font-semibold px-8 py-4 rounded-2xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105">
+                <button className="w-full rounded-2xl border border-primary bg-white px-8 py-4 font-semibold text-primary transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary hover:text-white sm:w-auto">
                   Start Chat
                 </button>
               </Link>
             </div>
           </div>
-          
-          {/* Contact Card */}
-          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h3>
-            
-            <div className="space-y-4 mb-8">
+
+          <div className="saas-card p-8">
+            <h3 className="mb-6 text-2xl font-semibold text-gray-900">Contact Information</h3>
+
+            <div className="mb-8 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <span className="text-primary font-bold">📍</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <MapPin className="h-5 w-5 text-primary" />
                 </div>
                 <span className="text-gray-700">Florida, USA</span>
               </div>
-              
+
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <span className="text-primary font-bold">📞</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <Phone className="h-5 w-5 text-primary" />
                 </div>
-                <a href="tel:+12067045757" className="text-primary font-semibold hover:underline">
+                <a href="tel:+12067045757" className="font-semibold text-primary hover:underline">
                   +1 (206) 704-5757
                 </a>
               </div>
-              
+
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <span className="text-primary font-bold">✉️</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <Mail className="h-5 w-5 text-primary" />
                 </div>
-                <a href="mailto:srssolutionltd@gmail.com" className="text-primary font-semibold hover:underline">
+                <a href="mailto:srssolutionltd@gmail.com" className="font-semibold text-primary hover:underline">
                   srssolutionltd@gmail.com
                 </a>
               </div>
             </div>
-            
-            {/* Quick Links */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm border-t border-gray-100 pt-6">
+
+            <div className="grid grid-cols-1 gap-6 border-t border-gray-100 pt-6 text-sm sm:grid-cols-3">
               <div>
-                <div className="font-bold text-gray-900 mb-3">Services</div>
+                <div className="mb-3 font-semibold text-gray-900">Services</div>
                 <ul className="space-y-2 text-gray-600">
-                  <li><a href="/create-paystub" className="hover:text-primary transition-colors">Paystubs</a></li>
-                  <li><a href="/contact" className="hover:text-primary transition-colors">W‑2 Forms</a></li>
-                  <li><a href="/contact" className="hover:text-primary transition-colors">1099‑MISC</a></li>
+                  <li><a href="/create-paystub" className="transition-colors hover:text-primary">Paystubs</a></li>
+                  <li><a href="/contact" className="transition-colors hover:text-primary">W-2 Forms</a></li>
+                  <li><a href="/contact" className="transition-colors hover:text-primary">1099-MISC</a></li>
                 </ul>
               </div>
               <div>
-                <div className="font-bold text-gray-900 mb-3">Company</div>
+                <div className="mb-3 font-semibold text-gray-900">Company</div>
                 <ul className="space-y-2 text-gray-600">
-                  <li><a href="#about" className="hover:text-primary transition-colors">About Us</a></li>
-                  <li><a href="#pricing" className="hover:text-primary transition-colors">Pricing</a></li>
-                  <li><a href="#reviews" className="hover:text-primary transition-colors">Reviews</a></li>
+                  <li><a href="#about" className="transition-colors hover:text-primary">About Us</a></li>
+                  <li><a href="#pricing" className="transition-colors hover:text-primary">Pricing</a></li>
+                  <li><a href="#reviews" className="transition-colors hover:text-primary">Reviews</a></li>
                 </ul>
               </div>
               <div>
-                <div className="font-bold text-gray-900 mb-3">Support</div>
+                <div className="mb-3 font-semibold text-gray-900">Support</div>
                 <ul className="space-y-2 text-gray-600">
-                  <li><a href="#support" className="hover:text-primary transition-colors">Contact Us</a></li>
-                  <li><a href="#faq" className="hover:text-primary transition-colors">FAQ</a></li>
+                  <li><a href="#support" className="transition-colors hover:text-primary">Contact Us</a></li>
+                  <li><a href="#faq" className="transition-colors hover:text-primary">FAQ</a></li>
                 </ul>
               </div>
             </div>
-            
-            <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+
+            <div className="mt-8 border-t border-gray-100 pt-6 text-center">
               <p className="text-sm text-gray-500">
-                © {new Date().getFullYear()} SRS Financials. All Rights Reserved.
+                &copy; {new Date().getFullYear()} SRS Financials. All Rights Reserved.
               </p>
             </div>
           </div>

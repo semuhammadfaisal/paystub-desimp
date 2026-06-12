@@ -2,13 +2,18 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Plus, Download, Eye, DollarSign, Calendar, TrendingUp } from "lucide-react"
 import { signOut } from "@/lib/actions"
-import DocumentViewer from "@/components/document-viewer"
-import { generatePaystubPDF, downloadPDF, type PaystubData } from "@/lib/pdf-generator"
+import type { PaystubData } from "@/lib/pdf-generator"
+
+const DocumentViewer = dynamic(() => import("@/components/document-viewer"), {
+  ssr: false,
+  loading: () => null,
+})
 
 interface DashboardClientProps {
   user: any
@@ -33,8 +38,9 @@ export default function DashboardClient({ user, paystubs, orders }: DashboardCli
   const handleDownloadPaystub = async (paystub: any) => {
     setIsDownloading(paystub.id)
     try {
+      const { generatePaystubPDF, downloadPDF } = await import("@/lib/pdf-generator")
       const pdfBlob = await generatePaystubPDF(paystub)
-      const filename = `paystub-${paystub.employee_name.replace(/\s+/g, "-")}-${paystub.pay_date}.png`
+      const filename = `paystub-${paystub.employee_name.replace(/\s+/g, "-")}-${paystub.pay_date}.pdf`
       downloadPDF(pdfBlob, filename)
     } catch (error) {
       console.error("Error generating PDF:", error)

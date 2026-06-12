@@ -26,30 +26,30 @@ export function Header() {
   }
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header className="sticky top-0 z-50 px-3 py-3">
+      <div className="mx-auto max-w-7xl rounded-2xl border border-gray-200/80 bg-white/90 px-4 shadow-sm backdrop-blur-xl sm:px-6 lg:px-8">
+        <div className="flex h-[64px] items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0">
               <div className="flex items-center space-x-2">
-                <div className="bg-secondary text-secondary-foreground px-3 py-1 rounded font-bold text-sm">SRS</div>
-                <span className="text-primary font-bold text-lg">FINANCIALS</span>
+                <div className="rounded-xl bg-secondary px-3 py-2 text-sm font-bold leading-none text-secondary-foreground shadow-sm">SRS</div>
+                <span className="text-lg font-semibold leading-none tracking-tight text-primary">FINANCIALS</span>
               </div>
             </Link>
           </div>
 
           <nav className="hidden lg:block">
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center gap-1">
               <Link
                 href="/create-paystub"
-                className="text-foreground hover:text-primary px-4 py-2 text-sm font-medium rounded-md hover:bg-muted/50 transition-colors"
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-muted/70 hover:text-primary"
               >
                 Paystubs
               </Link>
 
               <Link
                 href="/contact"
-                className="text-foreground hover:text-primary px-4 py-2 text-sm font-medium rounded-md hover:bg-muted/50 transition-colors"
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-muted/70 hover:text-primary"
               >
                 W2 Form
               </Link>
@@ -60,7 +60,7 @@ export function Header() {
                   onClick={() => setTaxDropdownOpen(!taxDropdownOpen)}
                   onMouseEnter={() => setTaxDropdownOpen(true)}
                   onMouseLeave={() => setTaxDropdownOpen(false)}
-                  className="flex items-center text-foreground hover:text-primary px-4 py-2 text-sm font-medium rounded-md hover:bg-muted/50 transition-colors"
+                  className="flex items-center rounded-xl px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-muted/70 hover:text-primary"
                 >
                   Tax Return
                   <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${taxDropdownOpen ? 'rotate-180' : ''}`} />
@@ -68,7 +68,7 @@ export function Header() {
                 
                 {taxDropdownOpen && (
                   <div 
-                    className="absolute top-full left-0 mt-1 w-[600px] bg-white border rounded-md shadow-lg z-50"
+                    className="absolute left-0 top-full z-50 mt-2 w-[600px] rounded-2xl border bg-white shadow-xl"
                     onMouseEnter={() => setTaxDropdownOpen(true)}
                     onMouseLeave={() => setTaxDropdownOpen(false)}
                   >
@@ -76,7 +76,7 @@ export function Header() {
                       <div className="row-span-3">
                         <Link
                           href="/contact"
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none hover:shadow-md text-foreground transition-all"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-xl border border-gray-200 bg-muted/60 p-6 text-foreground no-underline outline-none transition-all hover:border-primary/30 hover:shadow-md"
                         >
                           <div className="mb-2 mt-4 text-lg font-medium">
                             Tax Returns
@@ -89,7 +89,7 @@ export function Header() {
                       <div>
                         <Link
                           href="/contact"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground text-foreground"
+                          className="block select-none space-y-1 rounded-xl p-3 leading-none text-foreground no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
                         >
                           <div className="text-sm font-medium leading-none">Individual Tax Return</div>
                           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
@@ -100,7 +100,7 @@ export function Header() {
                       <div>
                         <Link
                           href="/contact"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground text-foreground"
+                          className="block select-none space-y-1 rounded-xl p-3 leading-none text-foreground no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
                         >
                           <div className="text-sm font-medium leading-none">Business Tax Return</div>
                           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
@@ -115,14 +115,14 @@ export function Header() {
 
               <Link
                 href="/contact"
-                className="text-foreground hover:text-primary px-4 py-2 text-sm font-medium rounded-md hover:bg-muted/50 transition-colors"
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-muted/70 hover:text-primary"
               >
                 1099 Misc Form
               </Link>
 
               <Link
                 href="/blogs"
-                className="text-foreground hover:text-primary px-4 py-2 text-sm font-medium rounded-md hover:bg-muted/50 transition-colors"
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-muted/70 hover:text-primary"
               >
                 Blogs
               </Link>
@@ -144,13 +144,15 @@ export function Header() {
                 </Button>
               </>
             ) : (
-              <>
-                {/* Navigation buttons removed as requested */}
-              </>
+              <Link href="/create-paystub" className="hidden sm:block">
+                <Button size="sm" className="h-10 rounded-xl px-5 font-semibold">
+                  Create Paystub Now
+                </Button>
+              </Link>
             )}
 
             <button
-              className="lg:hidden p-2 rounded-md text-foreground hover:text-primary hover:bg-muted/50"
+              className="rounded-lg p-2 text-foreground transition-colors hover:bg-muted/70 hover:text-primary lg:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -159,17 +161,17 @@ export function Header() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-border/50 py-4">
-            <div className="flex flex-col space-y-2">
+          <div className="border-t border-border/50 py-4 lg:hidden">
+            <div className="flex flex-col space-y-2 rounded-2xl bg-white p-2 shadow-sm">
               <Link
                 href="/create-paystub"
-                className="text-foreground hover:text-primary px-4 py-2 text-sm font-medium rounded-md hover:bg-muted/50 transition-colors"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/70 hover:text-primary"
               >
                 Paystubs
               </Link>
               <Link
                 href="/create-w2"
-                className="text-foreground hover:text-primary px-4 py-2 text-sm font-medium rounded-md hover:bg-muted/50 transition-colors"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/70 hover:text-primary"
               >
                 W2 Form
               </Link>
@@ -180,19 +182,19 @@ export function Header() {
                 <div className="ml-4 space-y-2">
                   <Link
                     href="/create-tax-return"
-                    className="block text-foreground hover:text-primary text-sm py-1 rounded-md hover:bg-muted/50 transition-colors"
+                    className="block rounded-lg py-1 text-sm text-foreground transition-colors hover:bg-muted/70 hover:text-primary"
                   >
                     Overview
                   </Link>
                   <Link
                     href="/create-tax-return/individual"
-                    className="block text-foreground hover:text-primary text-sm py-1 rounded-md hover:bg-muted/50 transition-colors"
+                    className="block rounded-lg py-1 text-sm text-foreground transition-colors hover:bg-muted/70 hover:text-primary"
                   >
                     Individual Tax Return
                   </Link>
                   <Link
                     href="/create-tax-return/business"
-                    className="block text-foreground hover:text-primary text-sm py-1 rounded-md hover:bg-muted/50 transition-colors"
+                    className="block rounded-lg py-1 text-sm text-foreground transition-colors hover:bg-muted/70 hover:text-primary"
                   >
                     Business Tax Return
                   </Link>
@@ -201,13 +203,13 @@ export function Header() {
 
               <Link
                 href="/create-1099"
-                className="text-foreground hover:text-primary px-4 py-2 text-sm font-medium rounded-md hover:bg-muted/50 transition-colors"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/70 hover:text-primary"
               >
                 1099 Misc Form
               </Link>
               <Link
                 href="/blogs"
-                className="text-foreground hover:text-primary px-4 py-2 text-sm font-medium rounded-md hover:bg-muted/50 transition-colors"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/70 hover:text-primary"
               >
                 Blogs
               </Link>

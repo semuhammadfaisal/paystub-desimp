@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,9 +23,15 @@ import {
   Loader2
 } from "lucide-react"
 import { getUserPaystubs, deletePaystub } from "@/lib/actions"
-import { generatePaystubPDF, downloadPDF } from "@/lib/pdf-generator"
-import { PaystubPreview } from "@/components/paystub-preview"
 import { toast } from "sonner"
+
+const PaystubPreview = dynamic(
+  () => import("@/components/paystub-preview").then((mod) => mod.PaystubPreview),
+  {
+    ssr: false,
+    loading: () => <div className="p-8 text-center text-sm text-gray-500">Loading preview...</div>,
+  },
+)
 
 interface Paystub {
   id: string
@@ -48,6 +55,16 @@ export default function SavedPaystubsPage() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const router = useRouter()
+  const totals = useMemo(() => {
+    return paystubs.reduce(
+      (acc, paystub) => {
+        acc.gross += paystub.gross_pay
+        acc.net += paystub.net_pay
+        return acc
+      },
+      { gross: 0, net: 0 },
+    )
+  }, [paystubs])
 
   useEffect(() => {
     fetchPaystubs()
@@ -103,6 +120,7 @@ export default function SavedPaystubsPage() {
         total_deductions: paystub.gross_pay - paystub.net_pay,
       }
 
+      const { generatePaystubPDF, downloadPDF } = await import("@/lib/pdf-generator")
       const pdfBlob = await generatePaystubPDF(pdfData)
       const filename = `paystub-${paystub.employee_name.replace(/\s+/g, "-")}-${paystub.pay_date}.pdf`
       downloadPDF(pdfBlob, filename)
@@ -363,7 +381,7 @@ export default function SavedPaystubsPage() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Total Gross Pay</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {formatCurrency(paystubs.reduce((sum, p) => sum + p.gross_pay, 0))}
+                      {formatCurrency(totals.gross)}
                     </p>
                   </div>
                 </div>
@@ -377,7 +395,7 @@ export default function SavedPaystubsPage() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Total Net Pay</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {formatCurrency(paystubs.reduce((sum, p) => sum + p.net_pay, 0))}
+                      {formatCurrency(totals.net)}
                     </p>
                   </div>
                 </div>

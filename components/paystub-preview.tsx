@@ -1,16 +1,18 @@
 "use client"
 
+import { memo } from "react"
 import type { PaystubData } from "@/components/paystub-generator"
 import { ClassicPreview } from "@/components/paystub-templates/classic"
 import { ModernPreview } from "@/components/paystub-templates/modern"
 import { DetailedPreview } from "@/components/paystub-templates/detailed"
 import { CompactPreview } from "@/components/paystub-templates/compact"
+import { PdfTemplatePreview } from "@/components/paystub-templates/pdf-template"
 
 interface PaystubPreviewProps {
   data: PaystubData
 }
 
-export function PaystubPreview({ data }: PaystubPreviewProps) {
+export const PaystubPreview = memo(function PaystubPreview({ data }: PaystubPreviewProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -38,6 +40,62 @@ export function PaystubPreview({ data }: PaystubPreviewProps) {
   else if (selected === 'template2') content = <ModernPreview data={data} />
   else if (selected === 'template3') content = <DetailedPreview data={data} />
   else if (selected === 'template4') content = <CompactPreview data={data} />
+  else if (selected === 'template5') content = (
+    <PdfTemplatePreview
+      data={data}
+      pdfSrc="/templates/jose-06-05.pdf"
+      templateName="Jose 06-05"
+      templateKey="jose-06-05"
+    />
+  )
+  else if (selected === 'template6') content = (
+    <PdfTemplatePreview
+      data={data}
+      pdfSrc="/templates/stefanie-05-22.pdf"
+      templateName="Stefanie 05-22"
+      templateKey="stefanie-05-22"
+    />
+  )
+  else if (selected === 'template7') content = (
+    <PdfTemplatePreview
+      data={data}
+      pdfSrc="/templates/spencer-05-15.pdf"
+      templateName="Spencer 05-15"
+      templateKey="spencer-05-15"
+    />
+  )
+  else if (selected === 'template8') content = (
+    <PdfTemplatePreview
+      data={data}
+      pdfSrc="/templates/alyssa-03-27.pdf"
+      templateName="Alyssa 03-27"
+      templateKey="alyssa-03-27"
+    />
+  )
+  else if (selected === 'template9') content = (
+    <PdfTemplatePreview
+      data={data}
+      pdfSrc="/templates/charles-04-01.pdf"
+      templateName="Charles 04-01"
+      templateKey="charles-04-01"
+    />
+  )
+  else if (selected === 'template10') content = (
+    <PdfTemplatePreview
+      data={data}
+      pdfSrc="/templates/ktownes-stubs.pdf"
+      templateName="KTownes Stubs"
+      templateKey="ktownes-stubs"
+    />
+  )
+  else if (selected === 'template11') content = (
+    <PdfTemplatePreview
+      data={data}
+      pdfSrc="/templates/hector-cintron-25-feb.pdf"
+      templateName="Hector Cintron"
+      templateKey="hector-cintron"
+    />
+  )
   else content = (
     <div id="paystub-capture-target" className="bg-white border-2 border-gray-300 p-6 text-sm font-mono">
       {/* Header */}
@@ -284,28 +342,8 @@ export function PaystubPreview({ data }: PaystubPreviewProps) {
   )
 
   return (
-    <>
-      {/* Visible on-screen preview */}
-      <div id="paystub-preview-capture" className="preview-blur">
-        {content}
-      </div>
-      {/* Off-screen duplicate strictly for capture to improve reliability */}
-      <div
-        id="paystub-capture-snapshot"
-        style={{
-          position: 'fixed',
-          left: '-10000px',
-          top: 0,
-          width: '800px',
-          background: '#ffffff',
-          padding: 0,
-          margin: 0,
-          zIndex: -1,
-          visibility: 'visible',
-        }}
-      >
-        {content}
-      </div>
-    </>
+    <div id="paystub-preview-capture" className="preview-blur">
+      {content}
+    </div>
   )
-}
+})

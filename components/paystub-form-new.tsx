@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { StepHeader } from "@/components/step-header"
 import type { PaystubData } from "@/components/paystub-generator"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { calculateTaxes, calculateStateDisability, type TaxCalculationInput } from "@/lib/tax-calculator"
 
 interface PaystubFormProps {
@@ -15,8 +15,14 @@ interface PaystubFormProps {
   onUpdate: (updates: Partial<PaystubData>) => void
 }
 
+const AMOUNT_FORMATTER = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
 export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
   const [displayValues, setDisplayValues] = useState<Record<string, string>>({})
+  const didRunInitialTaxCalculation = useRef(false)
   // Optional: lock effective tax rates based on a reference scenario (e.g., salary = 1,000,000)
   const [lockedRates, setLockedRates] = useState<null | {
     medicareRate: number
@@ -39,6 +45,9 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
 
   // Auto-calculate taxes when component loads or key data changes
   useEffect(() => {
+    if (didRunInitialTaxCalculation.current) return
+    didRunInitialTaxCalculation.current = true
+
     // Ensure salary uses per-period amount based on MAX periods for the selected frequency (ignore selected # of stubs)
     const grossPay = data.payType === "hourly" 
       ? ((data.hourlyRate || 0) * (data.hoursWorked || 0)) + ((data.overtimeRate || 0) * (data.overtimeHours || 0))
@@ -89,9 +98,7 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
           ytdGrossPay: 0 // Force YTD to 0 to ensure SS tax calculates properly
         }
         
-        console.log('Tax calculation input:', taxInput)
         const taxResult = calculateTaxes(taxInput)
-        console.log('Tax calculation result:', taxResult)
         
         // Always update taxes to ensure they're calculated
         onUpdate({
@@ -117,7 +124,7 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
         }
       }
     }
-  }, [data.hourlyRate, data.hoursWorked, data.overtimeRate, data.overtimeHours, data.salary, data.numberOfPaystubs, data.payType, data.payFrequency, data.maritalStatus, data.exemptions, data.taxState, data.ytdGrossPay, data.employmentType])
+  }, [])
 
   const setDisplay = (key: string, val: string) => {
     setDisplayValues((prev) => ({ ...prev, [key]: val }))
@@ -348,7 +355,6 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
         // Debug: Log values to identify the issue
         // Fix: Use the displayed gross pay value for YTD calculations
         const displayedGrossPay = newData.grossPay || grossPay
-        console.log('YTD Debug - grossPay:', grossPay, 'displayedGrossPay:', displayedGrossPay, 'payPeriodNum:', payPeriodNum)
         updates.ytdGrossPay = calculateYTDTotal(displayedGrossPay, payPeriodNum)
         updates.ytdMedicare = calculateYTDTotal(updates.medicare, payPeriodNum)
         updates.ytdSocialSecurity = calculateYTDTotal(updates.socialSecurity, payPeriodNum)
@@ -408,7 +414,6 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
         // Debug: Log values to identify the issue
         // Fix: Use the displayed gross pay value for YTD calculations
         const displayedGrossPay = newData.grossPay || grossPay
-        console.log('YTD Debug - grossPay:', grossPay, 'displayedGrossPay:', displayedGrossPay, 'payPeriodNum:', payPeriodNum)
         updates.ytdGrossPay = calculateYTDTotal(displayedGrossPay, payPeriodNum)
         updates.ytdMedicare = calculateYTDTotal(updates.medicare, payPeriodNum)
         updates.ytdSocialSecurity = calculateYTDTotal(updates.socialSecurity, payPeriodNum)
@@ -430,74 +435,95 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
     onUpdate(updates)
   }
 
-  // Calculate gross pay for current period (for display only)
-  const calculateGrossPay = () => {
+  const calculatedGrossPay = useMemo(() => {
     if (data.payType === "hourly") {
       const regularPay = (data.hourlyRate || 0) * (data.hoursWorked || 0)
       const overtimePay = (data.overtimeRate || 0) * (data.overtimeHours || 0)
       return regularPay + overtimePay
     } else if (data.payType === "salary" && data.salary) {
-      // Use MAX periods for the selected frequency to keep YTD consistent regardless of selected number of stubs
       const maxPeriods = getMaxPaystubs(data.payFrequency)
       return calculateGrossPayPerPeriod(data.salary, maxPeriods)
     } else {
       return data.salary || 0
     }
-  }
+  }, [data.hourlyRate, data.hoursWorked, data.overtimeHours, data.overtimeRate, data.payFrequency, data.payType, data.salary])
 
-  // Calculate total deductions for current period (for display only)
-  const calculateTotalDeductions = () => {
+  const calculatedTotalDeductions = useMemo(() => {
     if (data.employmentType === 'contractor') return 0
     return (data.medicare || 0) + (data.socialSecurity || 0) + (data.federalTax || 0) + (data.stateTax || 0) + (data.stateDisability || 0)
-  }
+  }, [data.employmentType, data.federalTax, data.medicare, data.socialSecurity, data.stateDisability, data.stateTax])
 
-  // Calculate net pay for current period (for display only)
-  const calculateNetPay = () => {
-    return calculateGrossPay() - calculateTotalDeductions()
-  }
+  const calculatedNetPay = useMemo(() => calculatedGrossPay - calculatedTotalDeductions, [calculatedGrossPay, calculatedTotalDeductions])
+
+  // Keep the existing call sites simple while avoiding repeated arithmetic in the large table.
+  const calculateGrossPay = () => calculatedGrossPay
+  const calculateTotalDeductions = () => calculatedTotalDeductions
+  const calculateNetPay = () => calculatedNetPay
 
   // Format amounts with commas and 2 decimals (no currency symbol)
   const formatAmount = (n: number) => {
     if (n === null || n === undefined) return ''
-    return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(n)
+    return AMOUNT_FORMATTER.format(n)
   }
 
+  const selectedTemplate = (data.templateId || '').toLowerCase()
+  const adpIdTemplates = new Set(['template5', 'template6'])
+  const checkNumberTemplates = new Set(['template5', 'template6', 'template7', 'template8', 'template9', 'template10', 'template11'])
+  const directDepositTemplates = new Set(['template5', 'template6', 'template7', 'template8'])
+  const employeeIdTemplates = new Set(['template5', 'template6', 'template10', 'template11'])
+  const benefitTemplates = new Set(['template7', 'template10'])
+
+  const templateTextFields: Array<{ field: keyof PaystubData; placeholder: string; show: boolean }> = [
+    { field: 'coNumber', placeholder: 'CO. Number', show: adpIdTemplates.has(selectedTemplate) },
+    { field: 'fileNumber', placeholder: 'File Number', show: adpIdTemplates.has(selectedTemplate) },
+    { field: 'deptNumber', placeholder: 'Department Number', show: adpIdTemplates.has(selectedTemplate) },
+    { field: 'clockNumber', placeholder: 'Clock Number', show: adpIdTemplates.has(selectedTemplate) },
+    { field: 'vchrNumber', placeholder: 'Voucher Number', show: adpIdTemplates.has(selectedTemplate) || selectedTemplate === 'template9' },
+    { field: 'adviceNumber', placeholder: selectedTemplate === 'template9' || selectedTemplate === 'template10' || selectedTemplate === 'template11' ? 'Check Number' : 'Advice Number', show: checkNumberTemplates.has(selectedTemplate) },
+    { field: 'employeeId', placeholder: 'Employee ID', show: employeeIdTemplates.has(selectedTemplate) },
+    { field: 'accountNumber', placeholder: 'Account Number', show: directDepositTemplates.has(selectedTemplate) },
+    { field: 'transitNumber', placeholder: 'Transit Number', show: directDepositTemplates.has(selectedTemplate) },
+    { field: 'abaNumber', placeholder: 'ABA / Routing Number', show: directDepositTemplates.has(selectedTemplate) },
+  ].filter((field) => field.show)
+
+  const templateAmountFields: Array<{ field: keyof PaystubData; placeholder: string; show: boolean }> = [
+    { field: 'healthInsurance', placeholder: selectedTemplate === 'template7' ? 'Aflac Accident Adv.' : 'SUI / Extra Deduction', show: benefitTemplates.has(selectedTemplate) },
+    { field: 'stateDisability', placeholder: selectedTemplate === 'template7' ? 'Aflac Disability Ins.' : 'SUI / State Disability', show: benefitTemplates.has(selectedTemplate) },
+  ].filter((field) => field.show)
+
   return (
-    <div className="space-y-0">
-      <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-lg">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-lg">
+    <div className="paystub-form-surface space-y-8">
+      <div className="saas-card p-6 sm:p-8">
+        <div className="mb-8 flex items-center gap-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-lg font-bold text-white shadow-sm">
             2
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Paystub Details</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900">Paystub Details</h2>
         </div>
         <div className="mb-6 text-sm text-gray-500">
           * Required fields
         </div>
         
         {/* Basic Settings */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="space-y-6">
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">Payment Type</Label>
+              <Label className="saas-label">Payment Type</Label>
               <ToggleGroup
                 type="single"
                 value={data.payType}
                 onValueChange={(value) => value && handleInputChange("payType", value as "hourly" | "salary")}
-                className="w-full max-w-sm"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 p-1"
               >
                 <ToggleGroupItem 
                   value="hourly" 
-                  className="flex-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary border-primary text-primary hover:bg-primary/10"
+                  className="flex-1 rounded-lg border-0 text-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                 >
                   {data.payType === "hourly" ? "✓ " : ""}HOURLY
                 </ToggleGroupItem>
                 <ToggleGroupItem 
                   value="salary" 
-                  className="flex-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary border-primary text-primary hover:bg-primary/10"
+                  className="flex-1 rounded-lg border-0 text-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                 >
                   {data.payType === "salary" ? "✓ " : ""}SALARY
                 </ToggleGroupItem>
@@ -505,7 +531,7 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
             </div>
 
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Label className="saas-label flex items-center gap-2">
                 Employment Type
                 <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
                   <span className="text-white text-xs">?</span>
@@ -515,17 +541,17 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
                 type="single"
                 value={data.employmentType}
                 onValueChange={(value) => value && handleInputChange("employmentType", value)}
-                className="w-full max-w-sm"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 p-1"
               >
                 <ToggleGroupItem 
                   value="employee" 
-                  className="flex-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary border-primary text-primary hover:bg-primary/10"
+                  className="flex-1 rounded-lg border-0 text-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                 >
                   {data.employmentType === "employee" ? "✓ " : ""}EMPLOYEE
                 </ToggleGroupItem>
                 <ToggleGroupItem 
                   value="contractor" 
-                  className="flex-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary border-primary text-primary hover:bg-primary/10"
+                  className="flex-1 rounded-lg border-0 text-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                 >
                   {data.employmentType === "contractor" ? "✓ " : ""}CONTRACTOR
                 </ToggleGroupItem>
@@ -533,7 +559,7 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Label htmlFor="email" className="saas-label flex items-center gap-2">
                 Email address
                 <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
                   <span className="text-white text-xs">?</span>
@@ -544,7 +570,7 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
                 type="email"
                 value={data.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                className="border border-gray-300 rounded px-3 py-2 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="saas-field"
                 placeholder="email@example.com"
               />
             </div>
@@ -552,9 +578,9 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
 
           <div className="space-y-6">
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">Payment frequency</Label>
+              <Label className="saas-label">Payment frequency</Label>
               <Select value={data.payFrequency} onValueChange={(value) => handleInputChange("payFrequency", value)}>
-                <SelectTrigger className="border border-gray-300 rounded px-3 py-2 focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+                <SelectTrigger className="saas-field">
                   <SelectValue placeholder="Bi-Weekly (ex: every other Wednesday)" />
                 </SelectTrigger>
                 <SelectContent>
@@ -571,12 +597,12 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
             </div>
 
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">Number of paystubs required</Label>
+              <Label className="saas-label">Number of paystubs required</Label>
               <Select
                 value={data.numberOfPaystubs.toString()}
                 onValueChange={(value) => handleInputChange("numberOfPaystubs", parseInt(value))}
               >
-                <SelectTrigger className="border border-gray-300 rounded px-3 py-2 focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+                <SelectTrigger className="saas-field">
                   <SelectValue placeholder="1 paystub" />
                 </SelectTrigger>
                 <SelectContent>
@@ -593,14 +619,14 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
             </div>
 
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Label className="saas-label flex items-center gap-2">
                 State to be used in tax calculations
                 <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
                   <span className="text-white text-xs">?</span>
                 </div>
               </Label>
               <Select value={data.taxState} onValueChange={(value) => handleInputChange("taxState", value)}>
-                <SelectTrigger className="border border-gray-300 rounded px-3 py-2 focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+                <SelectTrigger className="saas-field">
                   <SelectValue placeholder="State *" />
                 </SelectTrigger>
                 <SelectContent>
@@ -659,23 +685,54 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
             </div>
           </div>
         </div>
+
+        {(templateTextFields.length > 0 || templateAmountFields.length > 0) && (
+          <div className="mt-8 border-t border-gray-200 pt-8">
+            <h3 className="mb-5 text-lg font-semibold text-gray-900">Template Specific Fields</h3>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {templateTextFields.map((templateField) => (
+                <Input
+                  key={String(templateField.field)}
+                  value={String(data[templateField.field] || '')}
+                  onChange={(e) => handleInputChange(templateField.field, e.target.value)}
+                  placeholder={templateField.placeholder}
+                  className="border border-gray-300 rounded px-3 py-2 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                />
+              ))}
+              {templateAmountFields.map((templateField) => (
+                <Input
+                  key={String(templateField.field)}
+                  type="text"
+                  value={getDisplay(String(templateField.field), String(data[templateField.field] || ''))}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    setDisplay(String(templateField.field), v)
+                    handleInputChange(templateField.field, toNumber(v))
+                  }}
+                  placeholder={templateField.placeholder}
+                  className="border border-gray-300 rounded px-3 py-2 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Company Information Section */}
-      <div className="mt-8">
-        <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-lg">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-lg">
+      <div>
+        <div className="saas-card p-6 sm:p-8">
+          <div className="mb-8 flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-lg font-bold text-white shadow-sm">
               3
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Company Information</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900">Company Information</h2>
           </div>
           <div className="mb-6 text-sm text-gray-500">
             * Required fields
           </div>
           
           {/* Company Information Form */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-6">
               <div className="space-y-2">
                 <Input
@@ -805,20 +862,20 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
       </div>
 
       {/* Employee Information Section */}
-      <div className="mt-8">
-        <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-lg">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-lg">
+      <div>
+        <div className="saas-card p-6 sm:p-8">
+          <div className="mb-8 flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-lg font-bold text-white shadow-sm">
               4
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Employee Information</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900">Employee Information</h2>
           </div>
           <div className="mb-6 text-sm text-gray-500">
             * Required fields
           </div>
           
           {/* Employee Information Form */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-6">
               <div className="space-y-2">
                 <Input
@@ -1039,27 +1096,27 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
       </div>
 
       {/* STEP 5 - Earnings Statement Section */}
-      <div className="mt-8">
-        <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-lg">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-lg">
+      <div>
+        <div className="saas-card p-6 sm:p-8">
+          <div className="mb-8 flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-lg font-bold text-white shadow-sm">
               5
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Earnings Statement</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900">Earnings Statement</h2>
           </div>
           
 
         
           {/* Pay Period Section */}
-          <div className="space-y-6 mb-8">
+          <div className="mb-8 space-y-6 rounded-2xl border border-gray-200 bg-gray-50/60 p-5">
             {/* Pay period number */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Pay period number</Label>
+              <Label className="saas-label">Pay period number</Label>
               <Select
                 value={(data.payPeriodNumber || 1).toString()}
                 onValueChange={(value) => handleInputChange("payPeriodNumber", parseInt(value))}
               >
-                <SelectTrigger className="w-48 border-b-2 border-teal-500 rounded-none border-t-0 border-l-0 border-r-0 bg-transparent">
+                <SelectTrigger className="w-full max-w-56 bg-white">
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1074,32 +1131,32 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
             </div>
 
             {/* Pay period and Pay date */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                <Label className="saas-label flex items-center gap-1">
                   Pay period 
                   <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
                     <span className="text-white text-xs">?</span>
                   </div>
                 </Label>
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                   <Input
                     type="date"
                     value={data.payPeriodStart}
                     onChange={(e) => handleInputChange("payPeriodStart", e.target.value)}
-                                            className="border-b-2 border-primary rounded-none border-t-0 border-l-0 border-r-0 bg-transparent text-sm"
+                    className="text-sm"
                   />
                   <span className="text-gray-400">-</span>
                   <Input
                     type="date"
                     value={data.payPeriodEnd}
                     onChange={(e) => handleInputChange("payPeriodEnd", e.target.value)}
-                                            className="border-b-2 border-primary rounded-none border-t-0 border-l-0 border-r-0 bg-transparent text-sm"
+                    className="text-sm"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                <Label className="saas-label flex items-center gap-1">
                   Pay date
                   <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
                     <span className="text-white text-xs">?</span>
@@ -1109,7 +1166,7 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
                   type="date"
                   value={data.payDate}
                   onChange={(e) => handleInputChange("payDate", e.target.value)}
-                                          className="border-b-2 border-primary rounded-none border-t-0 border-l-0 border-r-0 bg-transparent text-sm"
+                  className="text-sm"
                 />
               </div>
             </div>
@@ -1117,7 +1174,7 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
 
           {/* Earnings Table */}
           <div className="space-y-8">
-            <div className="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+            <div className="saas-table">
               <table className="w-full min-w-[800px]">
                 <thead>
                   <tr className="bg-gray-50">
@@ -1296,7 +1353,7 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
             </div>
 
             {/* Deductions Table */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+            <div className="saas-table">
               <table className="w-full min-w-[600px]">
                 <thead>
                   <tr className="bg-gray-50">
@@ -1413,7 +1470,7 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
                           })()}
                         </td>
                       </tr>
-                      {(data.stateTax && data.stateTax > 0) && (
+                      {(data.stateTax || 0) > 0 ? (
                         <tr className="border-b border-gray-200">
                           <td className="p-4 text-sm text-gray-700 border-r border-gray-200 flex items-center gap-2">
                             State Tax
@@ -1440,8 +1497,8 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
                             })()}
                           </td>
                         </tr>
-                      )}
-                      {(data.stateDisability && data.stateDisability > 0) && (
+                      ) : null}
+                      {(data.stateDisability || 0) > 0 ? (
                         <tr className="border-b border-gray-200">
                           <td className="p-4 text-sm text-gray-700 border-r border-gray-200 flex items-center gap-2">
                             {((data.taxState || '').toUpperCase() === 'HI') ? 'TDI' : 'SDI'}
@@ -1468,7 +1525,7 @@ export function PaystubForm({ data, onUpdate }: PaystubFormProps) {
                             })()}
                           </td>
                         </tr>
-                      )}
+                      ) : null}
                       <tr className="bg-gray-50">
                         <td className="p-4 text-sm font-semibold text-gray-700 border-r border-gray-200">Deduction Total</td>
                         <td className="p-4 text-center text-sm font-semibold text-gray-700 border-r border-gray-200">{calculateTotalDeductions() ? formatAmount(calculateTotalDeductions()) : ''}</td>

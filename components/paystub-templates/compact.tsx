@@ -150,20 +150,20 @@ export function CompactPreview({ data }: TemplateProps) {
                 <div className="amt" style={{ textAlign: 'right' }}><span className="calc-val">{formatCurrency(data.federalTax || 0)}</span></div>
                 <div className="ytd" style={{ textAlign: 'right', color: muted, fontSize: 13 }}><span className="calc-val">{formatCurrency(ytdFederal || 0)}</span></div>
               </div>
-              {(data.stateTax && data.stateTax > 0) && (
+              {(data.stateTax || 0) > 0 ? (
                 <div className="ded-item" style={{ display: 'grid', gridTemplateColumns: '1fr 80px 90px', gap: 8, padding: '8px 6px', alignItems: 'center', borderTop: '1px solid #e6ecff' }}>
                   <div>State Tax</div>
                   <div className="amt" style={{ textAlign: 'right' }}><span className="calc-val">{formatCurrency(data.stateTax || 0)}</span></div>
                   <div className="ytd" style={{ textAlign: 'right', color: muted, fontSize: 13 }}><span className="calc-val">{formatCurrency(ytdState || 0)}</span></div>
                 </div>
-              )}
-              {(data.stateDisability && data.stateDisability > 0) && (
+              ) : null}
+              {(data.stateDisability || 0) > 0 ? (
                 <div className="ded-item" style={{ display: 'grid', gridTemplateColumns: '1fr 80px 90px', gap: 8, padding: '8px 6px', alignItems: 'center', borderTop: '1px solid #e6ecff' }}>
                   <div>{stateDisabilityLabel}</div>
                   <div className="amt" style={{ textAlign: 'right' }}><span className="calc-val">{formatCurrency(data.stateDisability || 0)}</span></div>
                   <div className="ytd" style={{ textAlign: 'right', color: muted, fontSize: 13 }}><span className="calc-val">{formatCurrency(ytdSDI || 0)}</span></div>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

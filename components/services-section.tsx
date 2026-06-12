@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card"
 import { FileText, Calculator, CreditCard, Receipt, Building, Users } from "lucide-react"
 
 export function ServicesSection() {
@@ -36,41 +35,36 @@ export function ServicesSection() {
   ]
 
   return (
-    <section className="relative py-24 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 left-20 w-72 h-72 bg-secondary/5 rounded-full blur-3xl"></div>
-      </div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="bg-white py-14 sm:py-16">
+      <div className="saas-container">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
+        <div className="mx-auto mb-10 max-w-3xl text-center">
+          <div className="section-kicker">Services</div>
+          <h2 className="section-title">
             What We 
-            <span className="text-transparent bg-gradient-to-r from-primary to-secondary bg-clip-text">
+            <span className="text-primary">
               Do Best
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="section-copy">
             Professional document services that deliver results
           </p>
         </div>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-6">
           {services.map((service, index) => (
-            <div key={index} className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl border border-gray-100 hover:border-primary/20 transition-all duration-500 transform hover:-translate-y-2">
+            <div key={index} className="saas-card saas-card-hover group p-5 text-center">
               {/* Icon */}
-              <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <service.icon className="w-8 h-8 text-primary" />
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 transition-transform duration-300 group-hover:scale-105">
+                <service.icon className="h-7 w-7 text-primary" />
               </div>
               
               {/* Content */}
-              <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-primary transition-colors duration-300">
+              <h3 className="mb-3 text-base font-bold leading-tight text-gray-900 transition-colors duration-300 group-hover:text-primary">
                 {service.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-sm leading-relaxed text-gray-600">
                 {service.description}
               </p>
             </div>

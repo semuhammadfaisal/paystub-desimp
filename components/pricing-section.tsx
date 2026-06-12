@@ -1,7 +1,5 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Check } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -43,34 +41,28 @@ export function PricingSection() {
   }
 
   return (
-    <section id="pricing" className="relative py-24 bg-gradient-to-br from-slate-50 via-white to-blue-50/20 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-secondary/5 rounded-full blur-3xl"></div>
-      </div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="pricing" className="border-y border-gray-200 bg-gray-50/70 py-14 sm:py-16">
+      <div className="saas-container">
         {/* Header */}
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
+        <div className="mx-auto mb-10 max-w-3xl text-center">
+          <div className="section-kicker">Pricing</div>
+          <h2 className="section-title">
             Simple, 
-            <span className="text-transparent bg-gradient-to-r from-primary to-secondary bg-clip-text">
+            <span className="text-primary">
               Transparent Pricing
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="section-copy">
             Choose the plan that best fits your needs. No hidden fees, no hassle.
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-6 rounded-full"></div>
         </div>
 
         {/* Pricing Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
           {packages.map((pkg, index) => (
             <div
               key={index}
-              className={`relative bg-white rounded-2xl shadow-lg hover:shadow-xl border transition-all duration-300 transform hover:-translate-y-2 ${
+              className={`saas-card saas-card-hover relative ${
                 pkg.popular
                   ? "border-primary"
                   : "border-gray-200 hover:border-primary/30"
@@ -85,10 +77,10 @@ export function PricingSection() {
                 </div>
               )}
 
-              <div className="p-8">
+              <div className="p-6">
                 {/* Package Name & Description */}
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h3 className="mb-2 text-xl font-bold text-gray-900">
                     {pkg.name}
                   </h3>
                   <p className="text-gray-600 text-sm">
@@ -99,7 +91,7 @@ export function PricingSection() {
                 {/* Price */}
                 <div className="text-center mb-6">
                   <div className="flex items-baseline justify-center">
-                    <span className="text-4xl font-bold text-gray-900">
+                    <span className="text-3xl font-bold text-gray-900">
                       ${pkg.price}
                     </span>
                     <span className="text-gray-500 ml-2">one-time</span>
@@ -138,7 +130,7 @@ export function PricingSection() {
         </div>
 
         {/* Bottom Trust Indicators */}
-        <div className="mt-16 text-center">
+        <div className="mt-10 text-center">
           <div className="flex flex-wrap items-center justify-center gap-6 text-gray-600">
             <div className="flex items-center">
               <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>

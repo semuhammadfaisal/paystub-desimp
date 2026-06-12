@@ -138,7 +138,7 @@ export function DownloadHtmlFileButton({ data, label = "Download HTML", classNam
 
       // Minimal standalone HTML document using a small base stylesheet.
       // We rely on the inlined computed styles above for layout and visuals.
-      const title = `Paystub - ${data.templateId || "template"} - ${data.employeeName || "employee"}`
+      const title = `${data.employeeName || "Employee"} Paystub`
       const doc = `<!doctype html>
 <html lang="en">
 <head>
@@ -159,8 +159,8 @@ ${htmlFragment}
 </html>`
 
       // Instead of immediate download, store in localStorage and redirect to checkout.
-      const safeName = (data.employeeName || 'employee').replace(/[^a-z0-9\-_.]+/gi, '-')
-      const filename = `paystub-${(data.templateId||'template').toString().toLowerCase()}-${safeName}.html`
+      const safeName = (data.employeeName || 'employee').trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '')
+      const filename = `${safeName || 'employee'}-PAYSTUB.html`
       try {
         localStorage.setItem('paystub-html-doc', doc)
         localStorage.setItem('paystub-html-filename', filename)

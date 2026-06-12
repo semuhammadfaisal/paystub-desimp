@@ -8,47 +8,51 @@ export function ConfidenceSection() {
   ]
 
   return (
-    <section className="relative py-24 bg-gradient-to-br from-primary/5 via-white to-secondary/5 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-64 h-64 bg-primary/8 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-10 right-10 w-64 h-64 bg-secondary/8 rounded-full blur-3xl"></div>
-      </div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
+    <section className="saas-section bg-white">
+      <div className="saas-container">
+        <div className="mx-auto mb-12 max-w-3xl text-center">
+          <div className="section-kicker">Confidence</div>
+          <h2 className="section-title">
             Buy with 
-            <span className="text-transparent bg-gradient-to-r from-primary to-secondary bg-clip-text">
+            <span className="text-primary">
               Confidence
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="section-copy">
             Trusted platform, accurate documents, secure checkout
           </p>
-          <div className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-6 rounded-full"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {items.map((it, index) => (
-            <div key={it.title} className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl border border-gray-100 hover:border-primary/20 transition-all duration-500 transform hover:-translate-y-3 text-center">
-              {/* Icon container */}
-              <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                <it.icon className="h-10 w-10 text-primary group-hover:text-secondary transition-colors duration-300" />
+        <div className="overflow-hidden rounded-[2rem] bg-primary p-2 shadow-2xl shadow-primary/20">
+          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-[1.6rem] bg-white/15 md:grid-cols-3">
+            {items.map((it) => (
+              <div key={it.title} className="bg-primary px-8 py-8 text-white">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
+                  <it.icon className="h-6 w-6" />
+                </div>
+                <h3 className="mb-3 text-xl font-semibold text-white">
+                  {it.title}
+                </h3>
+                <p className="text-sm leading-7 text-white/80">
+                  {it.desc}
+                </p>
               </div>
-              
-              {/* Content */}
-              <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300 mb-4">
-                {it.title}
-              </h3>
-              <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-                {it.desc}
-              </p>
-              
-              {/* Decorative element */}
-              <div className="w-12 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-6 rounded-full transform scale-0 group-hover:scale-100 transition-transform duration-500"></div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-px border-t border-white/15 bg-white/15 md:grid-cols-3">
+            <div className="bg-primary px-8 py-5 text-white">
+              <div className="text-3xl font-semibold">24/7</div>
+              <div className="text-sm text-white/75">Support</div>
             </div>
-          ))}
+            <div className="bg-primary px-8 py-5 text-white">
+              <div className="text-3xl font-semibold">100%</div>
+              <div className="text-sm text-white/75">Secure</div>
+            </div>
+            <div className="bg-primary px-8 py-5 text-white">
+              <div className="text-3xl font-semibold">2 min</div>
+              <div className="text-sm text-white/75">Setup</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

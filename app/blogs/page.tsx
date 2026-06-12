@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button"
 import { Calendar, Clock, User, ArrowRight, Search } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
 
 export default function BlogsPage() {
   const blogPosts = [
@@ -78,16 +77,9 @@ export default function BlogsPage() {
   const categories = ["All", "Paystubs", "Tax Forms", "Tax Returns", "Business", "Tips"]
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="saas-shell min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Decorative background */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-48 -left-48 h-96 w-96 rounded-full bg-secondary/30 blur-3xl"></div>
-          <div className="absolute top-1/3 -right-16 h-96 w-96 rounded-full bg-primary/20 blur-3xl"></div>
-          <div className="absolute -bottom-24 left-1/4 h-96 w-96 rounded-full bg-secondary/20 blur-3xl"></div>
-        </div>
-
+      <section className="relative overflow-hidden bg-white">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-white/70 px-3 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/60 mb-6">
@@ -139,10 +131,9 @@ export default function BlogsPage() {
         {/* Featured Post */}
         {blogPosts.filter(post => post.featured).map((post) => (
           <div key={post.id} className="mb-16">
-            <div className="rounded-2xl border bg-white shadow-2xl ring-1 ring-border overflow-hidden">
+            <div className="saas-card overflow-hidden">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                 <div className="relative h-64 lg:h-auto">
-                  <div className="absolute -inset-6 -z-10 rounded-2xl bg-gradient-to-tr from-secondary/30 to-primary/20 blur-2xl"></div>
                   <img
                     src={post.image}
                     alt={post.title}
@@ -187,7 +178,7 @@ export default function BlogsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {blogPosts.filter(post => !post.featured).map((post) => (
             <article key={post.id} className="group">
-              <div className="rounded-2xl border bg-white shadow-lg ring-1 ring-border overflow-hidden hover:shadow-xl transition-all duration-300">
+              <div className="saas-card saas-card-hover overflow-hidden">
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={post.image}
@@ -237,7 +228,7 @@ export default function BlogsPage() {
       {/* Newsletter Section */}
       <section className="bg-muted/30 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="rounded-2xl border bg-white shadow-lg ring-1 ring-border p-8 lg:p-12">
+          <div className="saas-card p-8 lg:p-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">
               Stay Updated with Financial Tips
             </h2>

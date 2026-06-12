@@ -35,33 +35,27 @@ export function AudienceSection() {
   ]
 
   return (
-    <section id="audiences" className="relative py-24 bg-white overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-20 w-64 h-64 bg-secondary/5 rounded-full blur-3xl"></div>
-      </div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
+    <section id="audiences" className="saas-section bg-white">
+      <div className="saas-container">
+        <div className="mx-auto mb-12 max-w-3xl text-center">
+          <div className="section-kicker">Audience</div>
+          <h2 className="section-title">
             Who can use 
-            <span className="text-transparent bg-gradient-to-r from-primary to-secondary bg-clip-text">
+            <span className="text-primary">
               SRS Financials?
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="section-copy">
             Our professional document services are designed for anyone who needs reliable, accurate financial documentation
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-6 rounded-full"></div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {audiences.map((audience, index) => (
-            <div key={audience.title} className="group bg-gray-50 hover:bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl border border-gray-100 hover:border-primary/20 transition-all duration-500 transform hover:-translate-y-2">
+            <div key={audience.title} className="saas-card saas-card-hover group p-8">
               {/* Icon */}
-              <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <audience.icon className="w-8 h-8 text-primary group-hover:text-secondary transition-colors duration-300" />
+              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 transition-transform duration-300 group-hover:scale-105">
+                <audience.icon className="w-8 h-8 text-primary transition-colors duration-300" />
               </div>
               
               {/* Content */}
@@ -73,7 +67,7 @@ export function AudienceSection() {
               </p>
               
               {/* Decorative element */}
-              <div className="w-12 h-1 bg-gradient-to-r from-primary to-secondary rounded-full mt-6 transform scale-0 group-hover:scale-100 transition-transform duration-500"></div>
+              <div className="mt-6 h-1 w-12 scale-0 rounded-full bg-primary transition-transform duration-500 group-hover:scale-100"></div>
             </div>
           ))}
         </div>

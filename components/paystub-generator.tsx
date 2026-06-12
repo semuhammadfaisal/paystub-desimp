@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useDeferredValue, useState } from "react"
 import { PaystubForm } from "@/components/paystub-form-new"
 import { PaystubPreview } from "@/components/paystub-preview"
 import { LogoUpload } from "@/components/logo-upload"
 import { StepHeader } from "@/components/step-header"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DownloadHtmlButton } from "@/components/download-html-button"
 import { DownloadHtmlFileButton } from "@/components/download-html-file-button"
 import { Button } from "@/components/ui/button"
 import { MessageCircle } from "lucide-react"
@@ -71,6 +72,9 @@ export interface PaystubData {
     | "semi-annually"
     | "annually"
   adviceNumber: string
+  accountNumber: string
+  transitNumber: string
+  abaNumber: string
 
   // Earnings Details
   payType: "hourly" | "salary"
@@ -165,6 +169,9 @@ const initialData: PaystubData = {
   payDate: "",
   payFrequency: "bi-weekly",
   adviceNumber: "",
+  accountNumber: "",
+  transitNumber: "",
+  abaNumber: "",
   payType: "hourly",
   hourlyRate: 25,
   hoursWorked: 40,
@@ -206,13 +213,51 @@ const initialData: PaystubData = {
   netPay: 0,
 }
 
+const TEMPLATE_OPTIONS = [
+  { value: "template1", label: "Classic" },
+  { value: "template2", label: "Modern" },
+  { value: "template3", label: "Detailed" },
+  { value: "template4", label: "Compact" },
+  { value: "template5", label: "Jose" },
+  { value: "template6", label: "Stefanie" },
+  { value: "template7", label: "Spencer" },
+  { value: "template8", label: "Alyssa" },
+  { value: "template9", label: "Charles" },
+  { value: "template10", label: "KTownes" },
+  { value: "template11", label: "Hector Cintron" },
+]
+
+const THEME_OPTIONS = [
+  { id: "blue", color: "#60a5fa" },
+  { id: "green", color: "#10b981" },
+  { id: "gray", color: "#9ca3af" },
+  { id: "purple", color: "#8b5cf6" },
+  { id: "orange", color: "#f59e0b" },
+  { id: "red", color: "#ef4444" },
+]
+
+const getMaxPaystubs = (frequency: string | undefined): number => {
+  switch ((frequency || "bi-weekly").toLowerCase()) {
+    case "daily": return 52
+    case "weekly": return 52
+    case "bi-weekly": return 26
+    case "semi-monthly": return 24
+    case "monthly": return 12
+    case "quarterly": return 4
+    case "semi-annually": return 2
+    case "annually": return 1
+    default: return 26
+  }
+}
+
 export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGeneratorProps) {
   const [paystubData, setPaystubData] = useState<PaystubData>(() => ({
     ...initialData,
     templateId: initialTemplateId || initialData.templateId,
   }))
+  const previewData = useDeferredValue(paystubData)
 
-  const updatePaystubData = (updates: Partial<PaystubData>) => {
+  const updatePaystubData = useCallback((updates: Partial<PaystubData>) => {
     setPaystubData((prev) => {
       const updated = { ...prev, ...updates }
 
@@ -287,19 +332,6 @@ export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGene
             regularPay + overtimePay + holidayPay + sickPay + vacationPay + (updated.bonusAmount || 0) + (updated.commissionAmount || 0)
         } else {
           // Salary-based per-period gross pay: divide annual salary by MAX periods for the selected frequency
-          const getMaxPaystubs = (frequency: string | undefined): number => {
-            switch ((frequency || 'bi-weekly').toLowerCase()) {
-              case 'daily': return 52
-              case 'weekly': return 52
-              case 'bi-weekly': return 26
-              case 'semi-monthly': return 24
-              case 'monthly': return 12
-              case 'quarterly': return 4
-              case 'semi-annually': return 2
-              case 'annually': return 1
-              default: return 26
-            }
-          }
           const periods = getMaxPaystubs(updated.payFrequency)
           const perPeriodSalary = (updated.salary || 0) / (periods || 1)
           updated.grossPay = perPeriodSalary + (updated.bonusAmount || 0) + (updated.commissionAmount || 0)
@@ -329,46 +361,38 @@ export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGene
 
       return updated
     })
-  }
+  }, [])
 
   
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="space-y-8">
         {/* Template & Color Selection */}
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-3xl p-6 border">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <span className="text-lg font-semibold text-gray-700">Template:</span>
+        <div className="saas-card p-5 sm:p-6">
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+              <span className="text-sm font-semibold uppercase tracking-wide text-gray-600">Template:</span>
               <Select value={paystubData.templateId} onValueChange={(v) => updatePaystubData({ templateId: v })}>
-                <SelectTrigger className="w-48 h-11 bg-white border-2 rounded-xl">
+                <SelectTrigger className="h-11 w-full sm:w-56">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="template1">Classic</SelectItem>
-                  <SelectItem value="template2">Modern</SelectItem>
-                  <SelectItem value="template3">Detailed</SelectItem>
-                  <SelectItem value="template4">Compact</SelectItem>
+                  {TEMPLATE_OPTIONS.map((template) => (
+                    <SelectItem key={template.value} value={template.value}>{template.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             
-            <div className="flex items-center gap-4">
-              <span className="text-lg font-semibold text-gray-700">Color:</span>
-              <div className="flex gap-2">
-                {[
-                  { id: 'blue', color: '#60a5fa' },
-                  { id: 'green', color: '#10b981' },
-                  { id: 'gray', color: '#9ca3af' },
-                  { id: 'purple', color: '#8b5cf6' },
-                  { id: 'orange', color: '#f59e0b' },
-                  { id: 'red', color: '#ef4444' },
-                ].map((t) => (
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+              <span className="text-sm font-semibold uppercase tracking-wide text-gray-600">Color:</span>
+              <div className="flex flex-wrap gap-2">
+                {THEME_OPTIONS.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => updatePaystubData({ themeId: t.id, themeColor: t.color })}
-                    className={`w-8 h-8 rounded-full border-2 ${paystubData.themeId === t.id ? 'border-gray-800 scale-110' : 'border-gray-300'}`}
+                    className={`h-9 w-9 rounded-full border-2 shadow-sm transition-all duration-200 hover:scale-105 ${paystubData.themeId === t.id ? 'scale-110 border-gray-800 ring-4 ring-gray-200' : 'border-gray-300'}`}
                     style={{ backgroundColor: t.color }}
                   />
                 ))}
@@ -377,45 +401,45 @@ export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGene
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <PaystubPreview data={paystubData} />
-        </div>
-        {/* Custom Templates CTA */}
-        <div className="flex justify-center">
-          <a
-            href={`https://wa.me/12067045757?text=${encodeURIComponent("Hi! I'm interested in personalized and customized paystub templates. Can you help me?")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Get Custom Templates
-            </Button>
-          </a>
-        </div>
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(460px,0.92fr)] xl:items-start">
+          <div className="space-y-8">
+            <div className="saas-card p-6 sm:p-8">
+              <StepHeader step={1} title="Company Logo" />
+              <LogoUpload 
+                logo={paystubData.companyLogo} 
+                onLogoChange={(logo) => updatePaystubData({ companyLogo: logo })} 
+              />
+            </div>
 
-        <StepHeader step={1} title="Company Logo" />
-        
-        <div className="bg-white rounded-3xl border border-gray-200 shadow-lg p-8">
-          <LogoUpload 
-            logo={paystubData.companyLogo} 
-            onLogoChange={(logo) => updatePaystubData({ companyLogo: logo })} 
-          />
-        </div>
-
-        <div className="bg-white rounded-3xl border border-gray-200 shadow-lg overflow-hidden">
-          <PaystubForm data={paystubData} onUpdate={updatePaystubData} />
-        </div>
-
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-lg">
-            6
+            <PaystubForm data={paystubData} onUpdate={updatePaystubData} />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Review & Download</h2>
-        </div>
-        
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8">
-          <PaystubPreview data={paystubData} />
+
+          <aside className="xl:sticky xl:top-28">
+            <div className="saas-card overflow-hidden">
+              <div className="flex items-center justify-end border-b border-gray-200 bg-gray-50 px-5 py-4">
+                <div className="h-2.5 w-2.5 rounded-full bg-primary" />
+              </div>
+              <div className="max-h-[calc(100vh-210px)] overflow-auto bg-gray-50/60 p-3 sm:p-5">
+                <div className="mx-auto w-full min-w-[720px] origin-top rounded-xl bg-white shadow-sm xl:min-w-0">
+                  <PaystubPreview data={previewData} />
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Templates CTA */}
+            <div className="mt-5 flex justify-center">
+              <a
+                href={`https://wa.me/12067045757?text=${encodeURIComponent("Hi! I'm interested in personalized and customized paystub templates. Can you help me?")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button className="px-6 py-3 font-medium text-white">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Get Custom Templates
+                </Button>
+              </a>
+            </div>
+          </aside>
         </div>
 
         {/* Color options moved to top */}
@@ -423,13 +447,16 @@ export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGene
         {/* Template selection and preview moved to top */}
       </div>
 
-      <div className="flex justify-center pt-8">
+      <div className="saas-card flex flex-col items-center justify-center gap-4 p-5 sm:flex-row sm:p-6">
+        <DownloadHtmlButton
+          data={paystubData}
+          label="Download PDF"
+        />
         <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
           <DownloadHtmlFileButton 
             data={paystubData} 
             label="Complete Order" 
-            className="relative bg-gradient-to-r from-primary to-secondary text-white px-10 py-4 rounded-2xl font-bold text-lg hover:from-primary/90 hover:to-secondary/90 transition-all duration-200 shadow-xl" 
+            className="relative bg-primary px-10 py-4 text-lg font-bold text-white shadow-md transition-all duration-200 hover:bg-primary/90 hover:shadow-lg" 
           />
         </div>
       </div>

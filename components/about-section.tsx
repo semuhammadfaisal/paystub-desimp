@@ -1,9 +1,9 @@
 export function AboutSection() {
   return (
-    <section id="about-extended" className="py-20 bg-gray-50">
+    <section id="about-extended" className="bg-gray-50/70 py-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12 text-center">
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
+        <div className="saas-card p-8 text-center md:p-12">
+          <h2 className="mx-auto mb-6 max-w-3xl text-3xl font-semibold tracking-tight text-gray-950 md:text-5xl">
             SRS Financials is proudly based in the USA
           </h2>
           

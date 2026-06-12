@@ -10,10 +10,9 @@ export default function ContactPage() {
   const signalLink = `https://signal.me/#eu/+12067045757`
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="saas-shell min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-card">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5"></div>
+      <section className="relative overflow-hidden bg-white">
         <div className="relative max-w-5xl mx-auto px-6 py-24 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-muted px-6 py-3 text-sm font-semibold text-primary mb-8 shadow-sm">
             <Zap className="h-4 w-4" />
@@ -52,21 +51,21 @@ export default function ContactPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-card border rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+            <div className="saas-card saas-card-hover p-8">
               <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6 mx-auto">
                 <Clock className="h-8 w-8 text-primary-foreground" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-foreground">15-30 min response</h3>
               <p className="text-muted-foreground">During business hours</p>
             </div>
-            <div className="bg-card border rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+            <div className="saas-card saas-card-hover p-8">
               <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6 mx-auto">
                 <ShieldCheck className="h-8 w-8 text-primary-foreground" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-foreground">Manual preparation</h3>
               <p className="text-muted-foreground">Real-looking templates</p>
             </div>
-            <div className="bg-card border rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+            <div className="saas-card saas-card-hover p-8">
               <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6 mx-auto">
                 <MessageCircle className="h-8 w-8 text-primary-foreground" />
               </div>
@@ -87,9 +86,9 @@ export default function ContactPage() {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
             {/* WhatsApp */}
-            <div className="bg-card rounded-3xl p-10 shadow-2xl border hover:shadow-3xl transition-all hover:-translate-y-2">
+            <div className="saas-card saas-card-hover p-8 sm:p-10">
               <div className="flex items-center gap-6 mb-8">
-                <div className="w-20 h-20 bg-green-600 rounded-3xl flex items-center justify-center shadow-lg">
+                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-green-600 shadow-lg">
                   <MessageCircle className="w-10 h-10 text-white" />
                 </div>
                 <div>
@@ -123,9 +122,9 @@ export default function ContactPage() {
             </div>
 
             {/* Signal */}
-            <div className="bg-card rounded-3xl p-10 shadow-2xl border hover:shadow-3xl transition-all hover:-translate-y-2">
+            <div className="saas-card saas-card-hover p-8 sm:p-10">
               <div className="flex items-center gap-6 mb-8">
-                <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center shadow-lg">
+                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary shadow-lg">
                   <MessageCircle className="w-10 h-10 text-primary-foreground" />
                 </div>
                 <div>
@@ -160,7 +159,7 @@ export default function ContactPage() {
           </div>
 
           {/* Other Contact Info */}
-          <div className="bg-card rounded-3xl p-10 shadow-2xl border mb-16">
+          <div className="saas-card mb-16 p-8 sm:p-10">
             <h3 className="text-2xl font-bold text-foreground mb-8 text-center">Other Contact Info</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="flex items-center gap-4 p-6 bg-muted rounded-2xl">
@@ -185,7 +184,7 @@ export default function ContactPage() {
           </div>
 
           {/* Services */}
-          <div className="bg-card rounded-3xl p-10 shadow-2xl border">
+          <div className="saas-card p-8 sm:p-10">
             <h3 className="text-3xl font-black text-foreground text-center mb-12">Our Services</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[

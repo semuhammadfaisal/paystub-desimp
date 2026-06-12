@@ -108,6 +108,23 @@ export async function getUserPaystubs() {
   }
 }
 
+export async function deletePaystub(paystubId: string) {
+  const supabase = createServerClient()
+
+  try {
+    const { error } = await supabase.from("paystubs").delete().eq("id", paystubId)
+
+    if (error) {
+      return { error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error("Delete paystub error:", error)
+    return { error: "Failed to delete paystub" }
+  }
+}
+
 export async function createOrder(orderData: {
   packageType: string
   amount: number
