@@ -217,7 +217,7 @@ const TEMPLATE_OPTIONS = [
   { value: "template2", label: "Modern" },
   { value: "template3", label: "Detailed" },
   { value: "template4", label: "Compact" },
-  { value: "template5", label: "Jose" },
+  { value: "template5", label: "SRS Payroll" },
   { value: "template6", label: "Stefanie" },
   { value: "template7", label: "Spencer" },
   { value: "template8", label: "Alyssa" },

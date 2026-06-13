@@ -87,17 +87,9 @@ const createSinglePagePdfBlob = (canvas: HTMLCanvasElement) => {
   const pdf = new jsPDF({ unit: "pt", format: "letter", compress: true })
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
-  const margin = 6
-  const usableWidth = pageWidth - margin * 2
-  const usableHeight = pageHeight - margin * 2
-  const scale = Math.min(usableWidth / canvas.width, usableHeight / canvas.height)
-  const imageWidth = canvas.width * scale
-  const imageHeight = canvas.height * scale
-  const x = (pageWidth - imageWidth) / 2
-  const y = (pageHeight - imageHeight) / 2
   const imageData = canvas.toDataURL("image/png", 1.0)
 
-  pdf.addImage(imageData, "PNG", x, y, imageWidth, imageHeight, undefined, "NONE")
+  pdf.addImage(imageData, "PNG", 0, 0, pageWidth, pageHeight, undefined, "NONE")
   return pdf.output("blob") as Blob
 }
 
@@ -174,28 +166,29 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
         cloneWrapper.style.left = '-10000px'
         cloneWrapper.style.top = '0'
         cloneWrapper.style.background = '#ffffff'
-        let widthPx = Math.ceil(primaryCaptureEl.getBoundingClientRect().width || primaryCaptureEl.scrollWidth || 980)
+        const primaryRect = primaryCaptureEl.getBoundingClientRect()
+        let widthPx = Math.ceil(primaryRect.width || primaryCaptureEl.scrollWidth || 980)
+        let heightPx = Math.ceil(primaryRect.height || primaryCaptureEl.scrollHeight || 1268)
         if (!widthPx || widthPx < 100) widthPx = 800
+        if (!heightPx || heightPx < 100) heightPx = 1100
         cloneWrapper.style.width = widthPx + 'px'
+        cloneWrapper.style.height = heightPx + 'px'
         const clone = primaryCaptureEl.cloneNode(true) as HTMLElement
         clone.style.width = widthPx + 'px'
+        clone.style.height = heightPx + 'px'
+        clone.style.minHeight = heightPx + 'px'
+        clone.style.maxHeight = heightPx + 'px'
         cloneWrapper.appendChild(clone)
 
-        // Sanitize clone: remove decorative overlays and complex backgrounds that can cause capture failures
+        // Sanitize clone: remove only UI controls that are not part of the document.
+        // Keep template marks/backgrounds so the downloaded PDF matches the preview.
         try {
           let removed = 0
           const allEls = Array.from(clone.querySelectorAll('*')) as HTMLElement[]
           for (const el of allEls) {
-            const text = (el.textContent || '').trim().toUpperCase()
-            const style = (el as HTMLElement).style
-            const bgImg = style?.backgroundImage || ''
-            const pos = style?.position || ''
-            // Remove watermark-like overlays and grid backgrounds
             if (
               el.getAttribute('data-nonexport') === 'true' ||
-              el.hasAttribute('data-template-watermark') ||
-              ((text === 'PREVIEW' || text === 'PREVIEW ONLY') && pos === 'absolute') ||
-              (bgImg.includes('repeating-linear-gradient') && (pos === 'absolute' || pos === 'fixed'))
+              el.getAttribute('data-decorative') === 'true'
             ) {
               el.remove()
               removed++
@@ -285,11 +278,6 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
                 const e = el as HTMLElement
                 if (e?.getAttribute && e.getAttribute('data-decorative') === 'true') return true
                 if (e?.getAttribute && e.getAttribute('data-nonexport') === 'true') return true
-                if (e?.hasAttribute && e.hasAttribute('data-template-watermark')) return true
-                const cs = getComputedStyle(e)
-                const bgImg = cs?.backgroundImage || ''
-                const pos = cs?.position || ''
-                if (bgImg.includes('repeating-linear-gradient') && (pos === 'absolute' || pos === 'fixed')) return true
               } catch {}
               return false
             },
@@ -351,20 +339,14 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
           primaryCaptureEl2.style.transform = 'none'
           primaryCaptureEl2.style.background = '#ffffff'
 
-          // Temporarily hide decorative overlays (watermark, grid backgrounds)
+          // Temporarily hide only UI controls that should not be exported.
           const hiddenEls: Array<{ el: HTMLElement, prevDisplay: string | null }> = []
           try {
             const els = Array.from(primaryCaptureEl2.querySelectorAll('*')) as HTMLElement[]
             for (const el of els) {
-              const cs = getComputedStyle(el)
-              const text = (el.textContent || '').trim().toUpperCase()
-              const bgImg = cs.backgroundImage || ''
-              const pos = cs.position || ''
               if (
                 el.getAttribute('data-nonexport') === 'true' ||
-                el.hasAttribute('data-template-watermark') ||
-                ((text === 'PREVIEW' || text === 'PREVIEW ONLY') && pos === 'absolute') ||
-                (bgImg.includes('repeating-linear-gradient') && (pos === 'absolute' || pos === 'fixed'))
+                el.getAttribute('data-decorative') === 'true'
               ) {
                 hiddenEls.push({ el, prevDisplay: el.style.display || null })
                 el.style.display = 'none'
@@ -418,11 +400,6 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
                 const e = el as HTMLElement
                 if (e?.getAttribute && e.getAttribute('data-decorative') === 'true') return true
                 if (e?.getAttribute && e.getAttribute('data-nonexport') === 'true') return true
-                if (e?.hasAttribute && e.hasAttribute('data-template-watermark')) return true
-                const cs = getComputedStyle(e)
-                const bgImg = cs?.backgroundImage || ''
-                const pos = cs?.position || ''
-                if (bgImg.includes('repeating-linear-gradient') && (pos === 'absolute' || pos === 'fixed')) return true
               } catch {}
               return false
             },
@@ -485,20 +462,14 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
             primaryCaptureEl3.style.transform = 'none'
             primaryCaptureEl3.style.background = '#ffffff'
 
-            // Temporarily hide decorative overlays
+            // Temporarily hide only UI controls that should not be exported.
             const hiddenEls3: Array<{ el: HTMLElement, prevDisplay: string | null }> = []
             try {
               const els3 = Array.from(primaryCaptureEl3.querySelectorAll('*')) as HTMLElement[]
               for (const el of els3) {
-                const cs = getComputedStyle(el)
-                const text = (el.textContent || '').trim().toUpperCase()
-                const bgImg = cs.backgroundImage || ''
-                const pos = cs.position || ''
                 if (
                   el.getAttribute('data-nonexport') === 'true' ||
-                  el.hasAttribute('data-template-watermark') ||
-                  ((text === 'PREVIEW' || text === 'PREVIEW ONLY') && pos === 'absolute') ||
-                  (bgImg.includes('repeating-linear-gradient') && (pos === 'absolute' || pos === 'fixed'))
+                  el.getAttribute('data-decorative') === 'true'
                 ) {
                   hiddenEls3.push({ el, prevDisplay: el.style.display || null })
                   el.style.display = 'none'
@@ -554,11 +525,6 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
                   const e = el as HTMLElement
                   if (e?.getAttribute && e.getAttribute('data-decorative') === 'true') return true
                   if (e?.getAttribute && e.getAttribute('data-nonexport') === 'true') return true
-                  if (e?.hasAttribute && e.hasAttribute('data-template-watermark')) return true
-                  const cs = getComputedStyle(e)
-                  const bgImg = cs?.backgroundImage || ''
-                  const pos = cs?.position || ''
-                  if (bgImg.includes('repeating-linear-gradient') && (pos === 'absolute' || pos === 'fixed')) return true
                 } catch {}
                 return false
               },

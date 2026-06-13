@@ -1490,32 +1490,92 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
   const companyCityLine = [data.companyCity, data.companyState, data.companyZip].filter(Boolean).join(" ")
   const employeeCityLine = [data.employeeCity, data.employeeState, data.employeeZip].filter(Boolean).join(" ")
   const accountSuffix = (data.employeeSSN || "8373").slice(-4)
+  const isJose = templateKey === "jose-06-05"
+  const joseUsesSampleDefaults = isJose && !data.employeeName && !data.companyName
+  const josePage: CSSProperties = {
+    ...page,
+    width: 860,
+    height: 1114,
+    minHeight: 1114,
+    border: "2px solid #111",
+    padding: "18px 30px 24px",
+    fontSize: 10,
+    lineHeight: 1.08,
+  }
+  const joseCompany = data.companyName || "J PRICE ENERGY SERVICES LLC"
+  const joseCompanyAddress = data.companyAddress || "PO BOX 485"
+  const joseCompanyCity = companyCityLine || "MADILL, OK 73446"
+  const joseEmployee = data.employeeName || "JOSE VALDEZ"
+  const joseEmployeeAddress = data.employeeAddress || "4111 NORTH ALAMO STREET"
+  const joseEmployeeCity = employeeCityLine || "FORT STOCKTON TX 79735"
+  const josePayStart = shortDate(data.payPeriodStart) || "05/18/2026"
+  const josePayEnd = shortDate(data.payPeriodEnd) || "05/31/2026"
+  const josePayDate = shortDate(data.payDate) || "06/05/2026"
+  const joseAdviceNumber = data.adviceNumber || data.vchrNumber || "00000351903"
+  const joseRegularRate = joseUsesSampleDefaults ? 34 : regularRate || 34
+  const joseRegularHours = joseUsesSampleDefaults ? 80 : regularHours || 80
+  const joseRegularPay = joseUsesSampleDefaults ? 2720 : regularPay || 2720
+  const joseYtdGross = joseUsesSampleDefaults ? 29920 : ytdGross || 29920
+  const joseFederal = joseUsesSampleDefaults ? 294.38 : data.federalTax || 294.38
+  const joseSocialSecurity = joseUsesSampleDefaults ? 168.64 : data.socialSecurity || 168.64
+  const joseMedicare = joseUsesSampleDefaults ? 39.44 : data.medicare || 39.44
+  const joseYtdFederal = joseUsesSampleDefaults ? 3238.18 : ytdFederal || 3238.18
+  const joseYtdSocialSecurity = joseUsesSampleDefaults ? 1855.04 : ytdSocialSecurity || 1855.04
+  const joseYtdMedicare = joseUsesSampleDefaults ? 433.84 : ytdMedicare || 433.84
+  const joseDeductions = joseUsesSampleDefaults ? 502.46 : data.totalDeductions || 502.46
+  const joseNetPay = joseUsesSampleDefaults ? 2217.54 : data.netPay || 2217.54
+  const joseHeader: CSSProperties = {
+    display: "grid",
+    alignItems: "end",
+    borderBottom: "0.5px solid #111",
+    fontWeight: 700,
+    paddingBottom: 6,
+    lineHeight: 1,
+  }
+  const joseSmallLabel: CSSProperties = {
+    alignSelf: "end",
+    justifySelf: "center",
+    background: "#fff",
+    padding: "0 2px 1px",
+    fontSize: 7,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    lineHeight: 1,
+    whiteSpace: "nowrap",
+  }
+  const joseSummaryLabel: CSSProperties = {
+    border: "0.5px solid #d2d2d2",
+    background:
+      "repeating-linear-gradient(-18deg, #f3f3f3 0, #f3f3f3 1px, #ffffff 1px, #ffffff 3px)",
+    padding: "3px 6px",
+    fontWeight: 800,
+  }
 
   return (
     <div id="paystub-capture-target" data-template={templateKey} className="bg-white overflow-x-auto p-4">
-      <div data-pdf-page="true" style={page}>
+      <div data-pdf-page="true" style={isJose ? josePage : page}>
         <div
-          data-nonexport="true"
           data-template-watermark
           style={{
             position: "absolute",
-            left: 110,
-            top: 610,
-            transform: "rotate(-24deg)",
-            color: "rgba(90,90,90,0.18)",
-            fontSize: 92,
+            left: isJose ? 92 : 110,
+            top: isJose ? 610 : 610,
+            transform: "rotate(-19deg)",
+            color: "rgba(78,78,78,0.36)",
+            fontSize: isJose ? 46 : 92,
             fontWeight: 800,
-            letterSpacing: 6,
+            letterSpacing: isJose ? 2 : 6,
             whiteSpace: "nowrap",
             pointerEvents: "none",
+            zIndex: 20,
           }}
         >
-          PREVIEW ONLY
+          {isJose ? "SAMPLE - NOT A CHECK" : "PREVIEW ONLY"}
         </div>
 
-        <header style={{ display: "grid", gridTemplateColumns: "1fr 1fr 94px", gap: 24, alignItems: "start" }}>
+        <header style={{ display: "grid", gridTemplateColumns: "1fr 1fr 88px", gap: 22, alignItems: "start" }}>
           <div>
-            <div style={{ display: "flex", gap: 10, width: 340, marginBottom: 20 }}>
+            <div style={{ display: "flex", gap: 8, width: 270, marginLeft: 88, marginBottom: 15 }}>
               <HashBox label="CO." value={data.coNumber || "AE7"} />
               <HashBox label="FILE" value={data.fileNumber || "000000"} />
               <HashBox label="DEPT." value={data.deptNumber || "000130"} />
@@ -1523,21 +1583,21 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
               <HashBox label="VCHR. NO." value={data.vchrNumber || "030"} />
             </div>
 
-            <div style={{ fontStyle: "italic", fontWeight: 700, marginTop: 8 }}>
-              {data.companyName || "J PRICE ENERGY SERVICES LLC"}
+            <div style={{ fontStyle: "italic", fontWeight: 700, marginLeft: 90, marginTop: 8 }}>
+              {joseCompany}
             </div>
-            <div style={{ fontStyle: "italic" }}>{data.companyAddress || "PO BOX 485"}</div>
-            <div style={{ fontStyle: "italic" }}>{companyCityLine || "MADILL, OK 73446"}</div>
+            <div style={{ fontStyle: "italic", marginLeft: 90 }}>{joseCompanyAddress}</div>
+            <div style={{ fontStyle: "italic", marginLeft: 90 }}>{joseCompanyCity}</div>
           </div>
 
-          <div style={{ paddingTop: 10 }}>
-            <h1 style={{ fontSize: 24, lineHeight: 1, margin: "0 0 24px", fontWeight: 800 }}>Earnings Statement</h1>
-            <InfoLine label="Period Start:" value={shortDate(data.payPeriodStart)} />
-            <InfoLine label="Period Ending:" value={shortDate(data.payPeriodEnd)} />
-            <InfoLine label="Pay Date:" value={shortDate(data.payDate)} />
+          <div style={{ paddingTop: 12 }}>
+            <h1 style={{ fontSize: 22, lineHeight: 1, margin: "0 0 20px", fontWeight: 800 }}>Earnings Statement</h1>
+            <InfoLine label="Period Start:" value={josePayStart} />
+            <InfoLine label="Period Ending:" value={josePayEnd} />
+            <InfoLine label="Pay Date:" value={josePayDate} />
           </div>
 
-          <div style={{ paddingTop: 10, textAlign: "right" }}>
+          <div style={{ paddingTop: 14, textAlign: "right" }}>
             {data.companyLogo ? (
               <img
                 src={data.companyLogo}
@@ -1545,14 +1605,14 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
                 style={{ maxWidth: 92, maxHeight: 54, marginLeft: "auto", objectFit: "contain", display: "block" }}
               />
             ) : (
-              <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: -2 }}>ADP</div>
+              <div style={{ fontSize: 30, lineHeight: 0.9, fontWeight: 900, letterSpacing: -2 }}>SRS</div>
             )}
           </div>
         </header>
 
-        <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, marginTop: 34 }}>
+        <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 76, marginTop: 38 }}>
           <div>
-            <div style={{ display: "grid", gridTemplateColumns: "126px 1fr", columnGap: 10, fontSize: 11 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "122px 1fr", columnGap: 8, fontSize: 9, marginLeft: 90 }}>
               <span>Taxable Marital Status:</span>
               <span className="calc-val">{taxStatus}</span>
               <span>Exemptions/Allowances:</span>
@@ -1562,146 +1622,134 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
               <span style={{ paddingLeft: 28 }}>GA:</span>
               <span className="calc-val">{data.exemptions || 0}</span>
             </div>
-            <div style={{ marginTop: 20, fontSize: 11 }}>
+            <div style={{ marginTop: 22, marginLeft: 90, fontSize: 9 }}>
               Social Security Number: <span className="calc-val" style={{ marginLeft: 26 }}>{maskSSN(data.employeeSSN)}</span>
             </div>
           </div>
 
-          <div style={{ paddingTop: 24, fontSize: 16, fontWeight: 800, textTransform: "uppercase" }}>
-            <div className="calc-val">{data.employeeName || "Employee Name"}</div>
-            <div className="calc-val">{data.employeeAddress || "Employee Address"}</div>
-            <div className="calc-val">{employeeCityLine || "City ST ZIP"}</div>
+          <div style={{ paddingTop: 22, paddingLeft: 12, fontSize: 15, lineHeight: 1.02, fontWeight: 800, textTransform: "uppercase" }}>
+            <div className="calc-val">{joseEmployee}</div>
+            <div className="calc-val">{joseEmployeeAddress}</div>
+            <div className="calc-val">{joseEmployeeCity}</div>
           </div>
         </section>
 
-        <main style={{ display: "grid", gridTemplateColumns: "1.08fr 0.92fr", gap: 70, marginTop: 34 }}>
+        <main style={{ display: "grid", gridTemplateColumns: "1.08fr 0.92fr", gap: 36, marginTop: 35 }}>
           <section>
-            <div style={{ ...sectionHeader, gridTemplateColumns: "1fr 72px 72px 88px 102px" }}>
-              <div style={{ fontSize: 16 }}>Earnings</div>
-              <SmallLabel>rate</SmallLabel>
-              <SmallLabel>hours</SmallLabel>
-              <SmallLabel>this period</SmallLabel>
-              <SmallLabel>year to date</SmallLabel>
+            <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "1fr 68px 68px 88px 102px" }}>
+              <div style={{ fontSize: 13, textDecoration: "underline" }}>Earnings</div>
+              <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "rate" : <SmallLabel>rate</SmallLabel>}</div>
+              <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "hours" : <SmallLabel>hours</SmallLabel>}</div>
+              <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "this period" : <SmallLabel>this period</SmallLabel>}</div>
+              <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "year to date" : <SmallLabel>year to date</SmallLabel>}</div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 72px 72px 88px 102px", paddingTop: 4 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 68px 68px 88px 102px", paddingTop: 4, fontSize: 9 }}>
               <div>Regular</div>
-              <div style={{ textAlign: "right" }}><Amount>{money(regularRate)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(regularHours)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(regularPay)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(ytdGross)}</Amount></div>
+              <div style={{ textAlign: "right" }}><Amount>{money(joseRegularRate)}</Amount></div>
+              <div style={{ textAlign: "right" }}><Amount>{money(joseRegularHours)}</Amount></div>
+              <div style={{ textAlign: "right" }}><Amount>{money(joseRegularPay)}</Amount></div>
+              <div style={{ textAlign: "right" }}><Amount>{money(joseYtdGross)}</Amount></div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 26, alignItems: "center" }}>
-              <div style={summaryLabel}>Gross Pay</div>
-              <div style={{ textAlign: "right", paddingRight: 6 }}><Amount bold>{money(data.grossPay)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(ytdGross)}</Amount></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 24, alignItems: "center", fontSize: 9 }}>
+              <div style={isJose ? joseSummaryLabel : summaryLabel}>Gross Pay</div>
+              <div style={{ textAlign: "right", paddingRight: 6 }}><Amount bold>{money(joseRegularPay)}</Amount></div>
+              <div style={{ textAlign: "right" }}><Amount>{money(joseYtdGross)}</Amount></div>
             </div>
 
-            <div style={{ ...sectionHeader, gridTemplateColumns: "1fr 88px 102px", marginTop: 32 }}>
-              <div style={{ fontSize: 16 }}>Deductions <span style={{ marginLeft: 34, fontSize: 13 }}>Statutory</span></div>
-              <SmallLabel>this period</SmallLabel>
-              <SmallLabel>year to date</SmallLabel>
+            <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "1fr 88px 102px", marginTop: 28 }}>
+              <div style={{ fontSize: 13, textDecoration: "underline" }}>Deductions <span style={{ marginLeft: 38, fontSize: 11, textDecoration: "none" }}>Statutory</span></div>
+              <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "this period" : <SmallLabel>this period</SmallLabel>}</div>
+              <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "year to date" : <SmallLabel>year to date</SmallLabel>}</div>
             </div>
 
             {[
-              ["Federal Tax", data.federalTax, ytdFederal],
-              ["Social Security Tax", data.socialSecurity, ytdSocialSecurity],
-              ["Medicare Tax", data.medicare, ytdMedicare],
-              ["State Tax", data.stateTax, ytdState],
+              ["Federal Tax", joseFederal, joseYtdFederal],
+              ["Social Security Tax", joseSocialSecurity, joseYtdSocialSecurity],
+              ["Medicare Tax", joseMedicare, joseYtdMedicare],
             ].map(([label, current, ytd]) => (
-              <div key={String(label)} style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", paddingTop: 5 }}>
+              <div key={String(label)} style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", paddingTop: 4, fontSize: 9 }}>
                 <div style={{ paddingLeft: 98 }}>{label}</div>
                 <div style={{ textAlign: "right" }}><Amount>{money(Number(current))}</Amount></div>
                 <div style={{ textAlign: "right" }}><Amount>{money(Number(ytd))}</Amount></div>
               </div>
             ))}
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 10, alignItems: "center" }}>
-              <div style={summaryLabel}>Deduction Total</div>
-              <div style={{ textAlign: "right" }}><Amount bold>{money(data.totalDeductions)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(ytdTotalDeductions)}</Amount></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 8, alignItems: "center", fontSize: 9 }}>
+              <div style={isJose ? joseSummaryLabel : summaryLabel}>Deduction Total</div>
+              <div style={{ textAlign: "right" }}><Amount bold>{money(joseDeductions)}</Amount></div>
+              <div style={{ textAlign: "right" }}><Amount>{money(joseFederal + joseSocialSecurity + joseMedicare)}</Amount></div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 10, alignItems: "center" }}>
-              <div style={summaryLabel}>Net Pay</div>
-              <div style={{ textAlign: "right" }}><Amount bold>{money(data.netPay)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(ytdNet)}</Amount></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 8, alignItems: "center", fontSize: 9 }}>
+              <div style={isJose ? joseSummaryLabel : summaryLabel}>Net Pay</div>
+              <div style={{ textAlign: "right" }}><Amount bold>{money(joseNetPay)}</Amount></div>
+              <div style={{ textAlign: "right" }}><Amount>{money(joseYtdGross - (joseYtdFederal + joseYtdSocialSecurity + joseYtdMedicare))}</Amount></div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", paddingTop: 6 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", paddingTop: 5, fontSize: 9 }}>
               <div style={{ paddingLeft: 98 }}>Checking</div>
-              <div style={{ textAlign: "right" }}><Amount>{money(-netCheck)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(priorYtdNet)}</Amount></div>
+              <div style={{ textAlign: "right" }}><Amount>{money(-joseNetPay)}</Amount></div>
+              <div style={{ textAlign: "right" }}><Amount>{money(0)}</Amount></div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 6, alignItems: "center" }}>
-              <div style={summaryLabel}>Net Check</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 5, alignItems: "center", fontSize: 9 }}>
+              <div style={isJose ? joseSummaryLabel : summaryLabel}>Net Check</div>
               <div style={{ textAlign: "right" }}><Amount bold>{money(0)}</Amount></div>
               <div />
             </div>
 
-            <div style={{ marginTop: 24, paddingLeft: 16, fontWeight: 800 }}>* Excluded from federal taxable wages</div>
-            <div style={{ marginTop: 12, paddingLeft: 16 }}>
-              Your federal taxable wages this period are <Amount>{money(data.grossPay)}</Amount>
+            <div style={{ marginTop: 22, paddingLeft: 16, fontWeight: 800, fontSize: 9 }}>* Excluded from federal taxable wages</div>
+            <div style={{ marginTop: 10, paddingLeft: 16, fontSize: 9 }}>
+              Your federal taxable wages this period are <Amount>{money(joseRegularPay)}</Amount>
             </div>
           </section>
 
           <section>
-            <div style={{ ...sectionHeader, gridTemplateColumns: "1fr 92px 102px" }}>
-              <div style={{ fontSize: 14 }}>Other Benefits and<br />Information</div>
-              <SmallLabel>this period</SmallLabel>
-              <SmallLabel>total to date</SmallLabel>
+            <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "1fr 92px 102px" }}>
+              <div style={{ fontSize: 13, textDecoration: "underline", lineHeight: 1 }}>Other Benefits and<br />Information</div>
+              <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "this period" : <SmallLabel>this period</SmallLabel>}</div>
+              <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "total to date" : <SmallLabel>total to date</SmallLabel>}</div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 92px 102px", rowGap: 6, padding: "8px 0 18px" }}>
-              <div>BASIS OF PAY: {data.payType === "hourly" ? "HOURLY" : "SALARY"}</div>
-              <div />
-              <div />
-              <div>PAY FREQUENCY: {(data.payFrequency || "").toUpperCase()}</div>
-              <div />
-              <div />
-              <div>EMPLOYEE ID: <span className="calc-val">{data.employeeId || data.fileNumber || "N/A"}</span></div>
-              <div />
-              <div />
-              <div>DEPARTMENT: <span className="calc-val">{data.deptNumber || "N/A"}</span></div>
-              <div />
-              <div />
-              <div>STATUS: <span className="calc-val">{data.employmentType || "employee"}</span></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 92px 102px", rowGap: 4, padding: "6px 0 24px", fontSize: 9 }}>
+              <div>BASIS OF PAY: {data.payType === "salary" ? "SALARY" : "HOURLY"}</div>
               <div />
               <div />
             </div>
 
-            <div style={{ borderBottom: "1.5px solid #111", fontWeight: 700, fontSize: 15, marginTop: 6, paddingBottom: 2 }}>Information</div>
-            <div style={{ paddingTop: 8 }}>COMPANY PH# {formatPhone(data.companyPhone) || "(580) 786-0575"}</div>
+            <div style={{ borderBottom: "0.5px solid #111", fontWeight: 700, fontSize: 13, marginTop: 8, paddingBottom: 6, textDecoration: "underline" }}>Information</div>
+            <div style={{ paddingTop: 8, fontSize: 9 }}>COMPANY PH# {formatPhone(data.companyPhone) || "(580) 786-0575"}</div>
           </section>
         </main>
 
-        <footer style={{ position: "absolute", left: 34, right: 34, bottom: 96 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, marginBottom: 28 }}>
+        <footer style={{ position: "absolute", left: 142, right: 30, bottom: 118 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 96, marginBottom: 22, fontSize: 9 }}>
             <div style={{ fontStyle: "italic", fontWeight: 700 }}>
-              <div>{data.companyName || "J PRICE ENERGY SERVICES LLC"}</div>
-              <div>{data.companyAddress || "PO BOX 485"}</div>
-              <div>{companyCityLine || "MADILL, OK 73446"}</div>
+              <div>{joseCompany}</div>
+              <div>{joseCompanyAddress}</div>
+              <div>{joseCompanyCity}</div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "130px 1fr", rowGap: 6 }}>
               <strong>Advice number:</strong>
-              <strong className="calc-val">{data.adviceNumber || data.vchrNumber || "00000351903"}</strong>
+              <strong className="calc-val">{joseAdviceNumber}</strong>
               <span>Pay date:</span>
-              <span className="calc-val">{shortDate(data.payDate)}</span>
+              <span className="calc-val">{josePayDate}</span>
             </div>
           </div>
 
-          <div style={{ borderTop: "1.5px solid #111", paddingTop: 8, display: "grid", gridTemplateColumns: "1.6fr 1fr 0.7fr 0.7fr 0.9fr", gap: 12, fontSize: 11, fontWeight: 700 }}>
+          <div style={{ borderTop: "0.5px solid #111", paddingTop: 8, display: "grid", gridTemplateColumns: "1.6fr 1fr 0.7fr 0.7fr 0.9fr", gap: 12, fontSize: 9, fontWeight: 700 }}>
             <div>Deposited to the account of</div>
             <div>Account number</div>
             <div>Transit</div>
             <div>ABA</div>
             <div style={{ textAlign: "right" }}>Amount</div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr 0.7fr 0.7fr 0.9fr", gap: 12, fontSize: 11, paddingTop: 6 }}>
-            <strong className="calc-val">{data.employeeName || "Employee Name"}</strong>
+          <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr 0.7fr 0.7fr 0.9fr", gap: 12, fontSize: 9, paddingTop: 6 }}>
+            <strong className="calc-val">{joseEmployee}</strong>
             <span className="calc-val">{data.accountNumber || `xxxxx${accountSuffix}`}</span>
             <span className="calc-val">{data.transitNumber || "xxxx"}</span>
             <span className="calc-val">{data.abaNumber || "xxxx"}</span>
-            <strong className="calc-val" style={{ textAlign: "right" }}>${money(netCheck)}</strong>
+            <strong className="calc-val" style={{ textAlign: "right" }}>${money(joseNetPay)}</strong>
           </div>
+          <div style={{ position: "absolute", right: 52, bottom: -54, fontSize: 18, fontWeight: 900 }}>NON-NEGOTIABLE</div>
         </footer>
       </div>
     </div>

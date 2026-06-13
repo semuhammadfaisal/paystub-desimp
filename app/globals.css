@@ -443,3 +443,11 @@
 #paystub-preview-capture.preview-blur #paystub-capture-target [data-template-watermark] {
   display: none !important;
 }
+
+#paystub-preview-capture.preview-blur #paystub-capture-target[data-template="jose-06-05"] [data-template-watermark] {
+  display: block !important;
+}
+
+#paystub-preview-capture.preview-blur #paystub-capture-target[data-template="jose-06-05"]::after {
+  display: none !important;
+}
