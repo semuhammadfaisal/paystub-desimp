@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Download } from "lucide-react"
-import { generatePaystubPDF } from "@/lib/pdf-generator"
 import type { PaystubData as PdfData } from "@/lib/pdf-generator"
 import type { PaystubData as GeneratorPaystubData } from "@/components/paystub-generator"
 
@@ -86,6 +85,7 @@ export function DownloadHtmlButton({ data, label = "Download PDF (HTML)" }: Prop
         ytd_net_pay: data.ytdNetPay,
       }
 
+      const { generatePaystubPDF } = await import("@/lib/pdf-generator")
       const blob = await generatePaystubPDF(pdfData)
       const safeName = (data.employeeName || 'employee').trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '')
       const filename = `${safeName || 'employee'}-PAYSTUB.pdf`

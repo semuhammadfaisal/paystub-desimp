@@ -1,12 +1,20 @@
 "use client"
 
-import { memo } from "react"
+import { memo, type ReactNode } from "react"
+import dynamic from "next/dynamic"
 import type { PaystubData } from "@/components/paystub-generator"
 import { ClassicPreview } from "@/components/paystub-templates/classic"
 import { ModernPreview } from "@/components/paystub-templates/modern"
 import { DetailedPreview } from "@/components/paystub-templates/detailed"
 import { CompactPreview } from "@/components/paystub-templates/compact"
-import { PdfTemplatePreview } from "@/components/paystub-templates/pdf-template"
+
+const PdfTemplatePreview = dynamic(
+  () => import("@/components/paystub-templates/pdf-template").then((mod) => mod.PdfTemplatePreview),
+  {
+    ssr: false,
+    loading: () => <div className="min-h-[900px] bg-white" />,
+  },
+)
 
 interface PaystubPreviewProps {
   data: PaystubData
@@ -35,7 +43,7 @@ export const PaystubPreview = memo(function PaystubPreview({ data }: PaystubPrev
 
   // Modular template routing but always wrap in a capture container
   const selected = (data.templateId || 'template1').toLowerCase()
-  let content: React.ReactNode
+  let content: ReactNode
   if (selected === 'template1') content = <ClassicPreview data={data} />
   else if (selected === 'template2') content = <ModernPreview data={data} />
   else if (selected === 'template3') content = <DetailedPreview data={data} />
