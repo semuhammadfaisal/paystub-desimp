@@ -148,24 +148,49 @@ export function DownloadHtmlFileButton({ data, label = "Download HTML", classNam
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${escapeHtml(title)}</title>
   <style>
-    @page { size: A4 portrait; margin: 0; }
+    @page { size: 9.03in 10in; margin: 0; }
     html, body { margin:0; padding:0; min-height:100%; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-    body { background:#eeeeee; display:flex; justify-content:center; align-items:flex-start; }
-    .a4-html-page { width:794px; min-height:1123px; background:#fff; margin:0 auto; overflow:hidden; }
+    body { background:#eeeeee; display:flex; justify-content:center; align-items:flex-start; padding:0; }
+    .a4-screen-frame { width:650px; height:720px; margin:0 auto; }
+    .a4-html-page { width:650px; height:720px; background:#fff; margin:0 auto; overflow:hidden; transform-origin:top left; }
     *, *::before, *::after { box-sizing: border-box; }
     img { max-width: 100%; display: block; }
     /* Prevent accidental text selection highlight from affecting appearance */
     ::selection { background: rgba(0,0,0,0.1); }
     @media print {
-      html, body { width:210mm; height:297mm; background:#fff; display:block; }
-      .a4-html-page { width:210mm !important; height:297mm !important; min-height:297mm !important; margin:0 !important; }
+      html, body { width:9.03in; height:10in; background:#fff; display:block; padding:0; }
+      .a4-screen-frame { width:9.03in !important; height:10in !important; margin:0 !important; }
+      .a4-html-page { width:9.03in !important; height:10in !important; margin:0 !important; transform:none !important; }
     }
   </style>
 </head>
 <body>
-<main class="a4-html-page">
+<main class="a4-screen-frame">
+<div class="a4-html-page">
 ${htmlFragment}
+</div>
 </main>
+<script>
+  (function () {
+    var frame = document.querySelector('.a4-screen-frame');
+    var page = document.querySelector('.a4-html-page');
+    if (!frame || !page) return;
+    function fitPage() {
+      if (window.matchMedia && window.matchMedia('print').matches) return;
+      var pageWidth = 650;
+      var pageHeight = 720;
+      var availableWidth = Math.max(320, window.innerWidth);
+      var availableHeight = Math.max(320, window.innerHeight);
+      var scale = Math.min(availableWidth / pageWidth, availableHeight / pageHeight, 1);
+      page.style.transform = 'scale(' + scale + ')';
+      frame.style.width = pageWidth * scale + 'px';
+      frame.style.height = pageHeight * scale + 'px';
+    }
+    window.addEventListener('resize', fitPage);
+    window.addEventListener('orientationchange', fitPage);
+    fitPage();
+  })();
+</script>
 </body>
 </html>`
 

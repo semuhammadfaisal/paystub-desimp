@@ -84,7 +84,7 @@ const getExportElement = (container: HTMLElement) => {
   return (container.querySelector('[data-pdf-page="true"]') as HTMLElement | null) || container
 }
 const createSinglePagePdfBlob = (canvas: HTMLCanvasElement) => {
-  const pdf = new jsPDF({ unit: "pt", format: "a4", compress: true })
+  const pdf = new jsPDF({ unit: "pt", format: [650, 720], compress: true })
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
   const imageData = canvas.toDataURL("image/png", 1.0)
@@ -969,7 +969,7 @@ export function generatePaystubPDF(data: PaystubData): Promise<Blob> {
 
     // Render to image then embed into a real PDF
     const imgData = canvas.toDataURL("image/png", 1.0)
-    const pdf = new jsPDF({ unit: "pt", format: "a4", compress: true })
+    const pdf = new jsPDF({ unit: "pt", format: [650, 720], compress: true })
     const pageWidth = pdf.internal.pageSize.getWidth()
     const pageHeight = pdf.internal.pageSize.getHeight()
 

@@ -104,15 +104,37 @@ function HashBox({ label, value }: { label: string; value: string | number }) {
   )
 }
 
-function LinedPanel({ children, minHeight = 280, lineStart = 130 }: { children: ReactNode; minHeight?: number; lineStart?: number }) {
+function LinedPanel({
+  children,
+  minHeight = 280,
+  lineStart = 130,
+  backgroundInset = 0,
+}: {
+  children: ReactNode
+  minHeight?: number
+  lineStart?: number
+  backgroundInset?: number
+}) {
   return (
-    <div style={{ position: "relative", minHeight, background: "#f7f9ff", padding: "6px 0 0", overflow: "hidden" }}>
+    <div style={{ position: "relative", minHeight, background: backgroundInset ? "#fff" : "#f7f9ff", padding: "6px 0 0", overflow: "hidden" }}>
+      {backgroundInset ? (
+        <div
+          style={{
+            position: "absolute",
+            left: backgroundInset,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            background: "#f7f9ff",
+          }}
+        />
+      ) : null}
       {Array.from({ length: Math.ceil((minHeight - lineStart) / 4) }).map((_, index) => (
         <div
           key={index}
           style={{
             position: "absolute",
-            left: 0,
+            left: backgroundInset,
             right: 0,
             top: lineStart + index * 4,
             height: 1,
@@ -157,13 +179,13 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
   const stefanieSsn = data.employeeSSN ? maskSSN(data.employeeSSN) : "XXX-XX-5202"
 
   const stefaniePage: CSSProperties = {
-    width: 794,
-    height: 1123,
-    minHeight: 1123,
+    width: 650,
+    height: 720,
+    minHeight: 720,
     margin: "0 auto",
     background: "#fff",
     color: "#000",
-    fontFamily: "Arial, Helvetica, sans-serif",
+    fontFamily: '"Arial Narrow", Arial, Helvetica, sans-serif',
     fontSize: 12,
     lineHeight: 1.15,
     position: "relative",
@@ -178,10 +200,10 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
     gridTemplateColumns: "64px 52px 58px 63px 64px",
     columnGap: 0,
     alignItems: "end",
-    fontSize: 5,
+    fontSize: 5.6,
     fontWeight: 700,
     textTransform: "lowercase",
-    background: "#f7f9ff",
+    background: "transparent",
   }
   const rowGrid: CSSProperties = {
     display: "grid",
@@ -189,30 +211,31 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
     columnGap: 0,
     alignItems: "center",
     padding: "4px 0 3px",
-    background: "#f7f9ff",
+    background: "transparent",
   }
   const deductionHeaderGrid: CSSProperties = {
     display: "grid",
     gridTemplateColumns: "64px 94px 71px 72px",
     columnGap: 0,
     alignItems: "end",
-    fontSize: 5,
+    fontSize: 5.6,
     fontWeight: 700,
     textTransform: "lowercase",
-    background: "#f7f9ff",
+    background: "transparent",
   }
   const deductionRowGrid: CSSProperties = {
     display: "grid",
     gridTemplateColumns: "64px 94px 71px 72px",
     columnGap: 0,
     alignItems: "center",
-    padding: "2px 0",
-    background: "#f7f9ff",
+    padding: "1.5px 0",
+    background: "transparent",
   }
   const summaryBox: CSSProperties = {
-    border: "1px solid #cfcfcf",
-    background: "#f8f8f8",
-    padding: "2px 4px",
+    borderTop: "0.5px solid #b9b9b9",
+    borderBottom: "0.5px solid #b9b9b9",
+    background: "transparent",
+    padding: "2px 4px 1px",
     fontWeight: 700,
   }
   const stefanieTopCell: CSSProperties = {
@@ -220,22 +243,27 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
     minWidth: 0,
   }
   const stefanieTopLabel: CSSProperties = {
-    fontSize: 4,
+    fontSize: 4.8,
     fontWeight: 700,
     paddingBottom: 1,
     lineHeight: 1,
   }
   const stefanieTopValue: CSSProperties = {
-    fontSize: 4,
+    fontSize: 4.8,
     paddingTop: 2,
     lineHeight: 1,
   }
 
   return (
-    <div id="paystub-capture-target" data-template={templateKey} className="bg-white overflow-x-auto p-4">
+    <div
+      id="paystub-capture-target"
+      data-template={templateKey}
+      className="overflow-x-auto p-0"
+      style={{ width: "fit-content", margin: "0 auto", background: "transparent" }}
+    >
       <div data-pdf-page="true" style={stefaniePage}>
         <header style={{ position: "relative", height: 58 }}>
-          <div style={{ position: "absolute", left: 48, top: 0, width: 210, fontSize: 5, lineHeight: 1.08 }}>
+          <div style={{ position: "absolute", left: 48, top: 0, width: 210, fontSize: 5.7, lineHeight: 1.05 }}>
             <div
               style={{
                 display: "grid",
@@ -267,8 +295,8 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
           </div>
 
           <div style={{ position: "absolute", left: 270, top: 3, width: 124 }}>
-            <h1 style={{ fontSize: 11, lineHeight: 1, margin: "0 0 14px", fontWeight: 900 }}>Earnings Statement</h1>
-            <div style={{ display: "grid", gridTemplateColumns: "58px 1fr", rowGap: 1, fontSize: 5, lineHeight: 1.1 }}>
+            <h1 style={{ fontSize: 12, lineHeight: 1, margin: "0 0 14px", fontWeight: 900 }}>Earnings Statement</h1>
+            <div style={{ display: "grid", gridTemplateColumns: "58px 1fr", rowGap: 1, fontSize: 5.4, lineHeight: 1.05 }}>
               <span>Period Start:</span>
               <span className="calc-val">{stefaniePayStart}</span>
               <span>Period Ending:</span>
@@ -292,7 +320,7 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
         </header>
 
         <section style={{ position: "relative", height: 74, marginTop: 18 }}>
-          <div style={{ position: "absolute", left: 48, top: 0, width: 220, fontSize: 5, lineHeight: 1.05 }}>
+          <div style={{ position: "absolute", left: 48, top: 0, width: 220, fontSize: 5.4, lineHeight: 1.02 }}>
             <div style={{ display: "grid", gridTemplateColumns: "80px 1fr", columnGap: 5 }}>
               <span>Taxable Marital Status:</span>
               <span className="calc-val">{taxStatus}</span>
@@ -310,18 +338,18 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
             </div>
           </div>
 
-          <div style={{ position: "absolute", left: 270, top: 0, width: 180, fontSize: 8, lineHeight: 1.05, fontWeight: 900, textTransform: "uppercase" }}>
+          <div style={{ position: "absolute", left: 270, top: 0, width: 180, fontSize: 8.6, lineHeight: 1.02, fontWeight: 900, textTransform: "uppercase" }}>
             <div className="calc-val">{data.employeeName || defaultEmployeeName}</div>
             <div className="calc-val">{stefanieEmployeeAddress}</div>
             <div className="calc-val">{stefanieEmployeeCity}</div>
           </div>
         </section>
 
-        <main style={{ marginTop: 2, marginLeft: -8, display: "grid", gridTemplateColumns: "301px 260px", gap: 8, position: "relative", zIndex: 1, fontSize: 5, lineHeight: 1.05 }}>
+        <main style={{ marginTop: 6, marginLeft: 34, display: "grid", gridTemplateColumns: "301px 260px", gap: 8, position: "relative", zIndex: 1, fontSize: 5.4, lineHeight: 1.02 }}>
           <section>
-            <LinedPanel minHeight={372} lineStart={88}>
+            <LinedPanel minHeight={372} lineStart={88} backgroundInset={52}>
               <div style={headerGrid}>
-                <div style={{ fontSize: 6, textTransform: "none", textDecoration: "underline" }}>Earnings</div>
+                <div style={{ fontSize: 6.4, textTransform: "none", textDecoration: "underline" }}>Earnings</div>
                 <div>rate</div>
                 <div>hours/units</div>
                 <div>this period</div>
@@ -335,14 +363,15 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
                 <div style={cellRight}><Amount>{money(regularPay)}</Amount></div>
                 <div style={cellRight}><Amount>{money(ytdGross)}</Amount></div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "158px 71px 72px", columnGap: 0, marginTop: 18, alignItems: "center", background: "#f7f9ff" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "52px 106px 71px 72px", columnGap: 0, marginTop: 18, alignItems: "center" }}>
+                <div />
                 <div style={summaryBox}>Gross Pay</div>
                 <div style={cellRight}><Amount bold>{money(data.grossPay)}</Amount></div>
                 <div style={cellRight}><Amount>{money(ytdGross)}</Amount></div>
               </div>
 
               <div style={{ ...deductionHeaderGrid, marginTop: 16 }}>
-                <div style={{ fontSize: 6, textTransform: "none", textDecoration: "underline" }}>Deductions</div>
+                <div style={{ fontSize: 6.4, textTransform: "none", textDecoration: "underline" }}>Deductions</div>
                 <div>statutory</div>
                 <div>this period</div>
                 <div>year to date</div>
@@ -361,7 +390,8 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
                   <div style={cellRight}><Amount>{money(Number(ytd))}</Amount></div>
                 </div>
               ))}
-              <div style={{ display: "grid", gridTemplateColumns: "158px 71px 72px", columnGap: 0, marginTop: 8, alignItems: "center", background: "#f7f9ff" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "52px 106px 71px 72px", columnGap: 0, marginTop: 8, alignItems: "center" }}>
+                <div />
                 <div style={summaryBox}>Net Pay</div>
                 <div style={cellRight}><Amount bold>{money(data.netPay)}</Amount></div>
                 <div style={cellRight}><Amount>{money(ytdNet)}</Amount></div>
@@ -372,19 +402,19 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
           <section>
             <LinedPanel minHeight={372} lineStart={72}>
               <div style={{ ...deductionHeaderGrid, gridTemplateColumns: "120px 70px 70px" }}>
-                <div style={{ fontSize: 6, textTransform: "none", lineHeight: 1.05 }}>Other Benefits and<br />Information</div>
+                <div style={{ fontSize: 6.4, textTransform: "none", lineHeight: 1.02 }}>Other Benefits and<br />Information</div>
                 <div>this period</div>
                 <div>total to date</div>
               </div>
               <div style={{ ...rule, marginTop: 2, marginBottom: 7, borderBottomWidth: 0.5 }} />
-              <div style={{ fontWeight: 800, fontSize: 7, lineHeight: 1.15, padding: "2px 0", background: "#f7f9ff" }}>Important Notes</div>
+              <div style={{ fontWeight: 800, fontSize: 7.6, lineHeight: 1.08, padding: "2px 0", background: "#f7f9ff" }}>Important Notes</div>
               <div style={{ ...rule, marginTop: 1, marginBottom: 3, borderBottomWidth: 0.5 }} />
               <div style={{ paddingTop: 2, lineHeight: 1.2, background: "#f7f9ff" }}>BASIS OF PAY: {data.payType === "hourly" ? "HOURLY" : "SALARY"}</div>
             </LinedPanel>
           </section>
         </main>
 
-        <section style={{ position: "absolute", left: 28, right: 28, bottom: 174, zIndex: 2, fontSize: 6, lineHeight: 1.05 }}>
+        <section style={{ position: "absolute", left: 42, right: 22, bottom: 149, zIndex: 2, fontSize: 6.3, lineHeight: 1.02 }}>
           <div style={{ display: "grid", gridTemplateColumns: "70px 190px 1fr", alignItems: "end", gap: 8 }}>
             <div>
               {data.companyLogo ? (
@@ -394,7 +424,7 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
                   style={{ maxWidth: 64, maxHeight: 35, objectFit: "contain", display: "block" }}
                 />
               ) : (
-                <div style={{ fontSize: 31, lineHeight: 0.85, fontWeight: 900, letterSpacing: -4, fontStyle: "italic" }}>ADP</div>
+                <div style={{ fontSize: 32, lineHeight: 0.85, fontWeight: 900, letterSpacing: -4, fontStyle: "italic" }}>ADP</div>
               )}
             </div>
             <div>
@@ -406,7 +436,7 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
           </div>
         </section>
 
-        <section style={{ position: "absolute", left: 28, right: 28, bottom: 74, zIndex: 2, fontSize: 6, lineHeight: 1.05 }}>
+        <section style={{ position: "absolute", left: 42, right: 22, bottom: 59, zIndex: 2, fontSize: 6.3, lineHeight: 1.02 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", marginBottom: 17 }}>
             <div />
             <div style={{ display: "grid", gridTemplateColumns: "128px 1fr", rowGap: 6 }}>
@@ -417,18 +447,18 @@ function StefanieTemplatePreview({ data, templateKey }: { data: GeneratorPaystub
             </div>
           </div>
           <div style={{ borderTop: "0.5px solid #111", borderBottom: "0.5px solid #111", padding: "4px 0", display: "grid", gridTemplateColumns: "52px 1fr 94px", gap: 12 }}>
-            <div style={{ fontSize: 5, fontWeight: 700 }}>
+            <div style={{ fontSize: 5.6, fontWeight: 700 }}>
               <div>Pay to the</div>
               <div>order of:</div>
             </div>
-            <div style={{ fontSize: 6, fontWeight: 800, textTransform: "uppercase" }} className="calc-val">
+            <div style={{ fontSize: 6.6, fontWeight: 800, textTransform: "uppercase" }} className="calc-val">
               {data.employeeName || defaultEmployeeName}
             </div>
             <div style={{ textAlign: "right", fontSize: 10, fontWeight: 900 }} className="calc-val">
               ${money(netCheck)}
             </div>
           </div>
-          <div style={{ marginTop: 5, fontSize: 5, fontWeight: 700, display: "grid", gridTemplateColumns: "54px 1fr" }}>
+          <div style={{ marginTop: 5, fontSize: 5.6, fontWeight: 700, display: "grid", gridTemplateColumns: "54px 1fr" }}>
             <span>This amount:</span>
             <span className="calc-val">VOID - NON NEGOTIABLE&nbsp;&nbsp;&nbsp;&nbsp; VOID - NON NEGOTIABLE</span>
           </div>
@@ -686,8 +716,9 @@ function AlyssaTemplatePreview({ data, templateKey }: { data: GeneratorPaystubDa
   const employeeCity = employeeCityLine || "LAVEEN, AZ 85339"
 
   const alyssaPage: CSSProperties = {
-    width: 860,
-    minHeight: 1114,
+    width: 612,
+    height: 850,
+    minHeight: 850,
     margin: "0 auto",
     background: "#fff",
     color: "#000",
@@ -696,7 +727,15 @@ function AlyssaTemplatePreview({ data, templateKey }: { data: GeneratorPaystubDa
     lineHeight: 1.05,
     position: "relative",
     overflow: "hidden",
+    padding: 0,
+  }
+  const alyssaSheet: CSSProperties = {
+    width: 860,
+    height: 1114,
     padding: "0 58px 38px",
+    boxSizing: "border-box",
+    transform: "scale(0.7116)",
+    transformOrigin: "top left",
   }
   const box: CSSProperties = { border: "2px solid #111" }
   const thinBox: CSSProperties = { border: "1.5px solid #111" }
@@ -729,8 +768,14 @@ function AlyssaTemplatePreview({ data, templateKey }: { data: GeneratorPaystubDa
   })
 
   return (
-    <div id="paystub-capture-target" data-template={templateKey} className="bg-white overflow-x-auto p-4">
+    <div
+      id="paystub-capture-target"
+      data-template={templateKey}
+      className="overflow-x-auto p-0"
+      style={{ width: "fit-content", margin: "0 auto", background: "transparent" }}
+    >
       <div data-pdf-page="true" style={alyssaPage}>
+        <div style={alyssaSheet}>
         <header style={{ height: 430, position: "relative" }}>
           <div style={{ position: "absolute", left: 8, top: 24 }}>
             <div>{companyName}</div>
@@ -784,7 +829,7 @@ function AlyssaTemplatePreview({ data, templateKey }: { data: GeneratorPaystubDa
         </header>
 
         <section style={{ position: "relative", marginTop: 0 }}>
-          <div style={{ position: "absolute", right: 0, top: -48, width: 424, ...box, borderBottom: 0, textAlign: "center", fontSize: 18, lineHeight: 1, padding: "10px 0 8px", boxSizing: "border-box" }}>
+          <div style={{ position: "absolute", right: 0, top: -42, width: 424, ...box, background: "#fff", zIndex: 2, textAlign: "center", fontSize: 18, lineHeight: 1, padding: "8px 0 7px", boxSizing: "border-box" }}>
             EMPLOYEE EARNINGS STATEMENT
           </div>
 
@@ -930,6 +975,7 @@ function AlyssaTemplatePreview({ data, templateKey }: { data: GeneratorPaystubDa
             </div>
           </div>
         </section>
+        </div>
       </div>
     </div>
   )
@@ -961,16 +1007,17 @@ function CharlesTemplatePreview({ data, templateKey }: { data: GeneratorPaystubD
 
   const charlesPage: CSSProperties = {
     width: 860,
-    minHeight: 1114,
+    height: 820,
+    minHeight: 820,
     margin: "0 auto",
     background: "#fff",
     color: "#000",
     fontFamily: "Arial, Helvetica, sans-serif",
-    fontSize: 10,
-    lineHeight: 1.1,
+    fontSize: 9,
+    lineHeight: 1.05,
     position: "relative",
     overflow: "hidden",
-    padding: "44px 32px 34px",
+    padding: "28px 32px 22px",
   }
   const right: CSSProperties = { textAlign: "right" }
   const mutedWatermark: CSSProperties = {
@@ -991,22 +1038,27 @@ function CharlesTemplatePreview({ data, templateKey }: { data: GeneratorPaystubD
     gridTemplateColumns: columns,
     columnGap: 8,
     alignItems: "center",
-    minHeight: 18,
-    padding: "3px 6px",
+    minHeight: 16,
+    padding: "2px 6px",
     boxSizing: "border-box",
     ...extra,
   })
 
   return (
-    <div id="paystub-capture-target" data-template={templateKey} className="bg-white overflow-x-auto p-4">
+    <div
+      id="paystub-capture-target"
+      data-template={templateKey}
+      className="overflow-x-auto p-0"
+      style={{ width: "fit-content", margin: "0 auto", background: "transparent" }}
+    >
       <div data-pdf-page="true" style={charlesPage}>
-        <header style={{ height: 258, position: "relative" }}>
+        <header style={{ height: 220, position: "relative" }}>
           <div style={{ position: "absolute", left: 22, top: 0 }}>
             <div>{companyName}</div>
             <div>{companyAddress}</div>
             <div>{companyCity}</div>
           </div>
-          <div style={{ position: "absolute", left: -22, top: 148, width: 145, transform: "rotate(-90deg)", transformOrigin: "left top", color: "#9a9a9a", whiteSpace: "nowrap", fontSize: 9 }}>
+          <div style={{ position: "absolute", left: -22, top: 136, width: 145, transform: "rotate(-90deg)", transformOrigin: "left top", color: "#9a9a9a", whiteSpace: "nowrap", fontSize: 8 }}>
             Payrolls by Paychex, Inc.
           </div>
           <div style={{ position: "absolute", right: 142, top: 42 }}>
@@ -1014,16 +1066,16 @@ function CharlesTemplatePreview({ data, templateKey }: { data: GeneratorPaystubD
             <div>{employeeAddress}</div>
             <div>{employeeCity}</div>
           </div>
-          <div style={{ position: "absolute", right: -38, top: 138, width: 145, transform: "rotate(90deg)", transformOrigin: "right top", color: "#9a9a9a", whiteSpace: "nowrap", fontSize: 9 }}>
+          <div style={{ position: "absolute", right: -38, top: 126, width: 145, transform: "rotate(90deg)", transformOrigin: "right top", color: "#9a9a9a", whiteSpace: "nowrap", fontSize: 8 }}>
             Payrolls by Paychex, Inc.
           </div>
-          <div style={{ position: "absolute", left: 38, top: 170, ...mutedWatermark }}>NON-NEGOTIABLE</div>
+          <div style={{ position: "absolute", left: 38, top: 154, ...mutedWatermark }}>NON-NEGOTIABLE</div>
           <div style={{ position: "absolute", right: 118, top: 84, ...mutedWatermark }}>NON-NEGOTIABLE</div>
         </header>
 
-        <main style={{ display: "grid", gridTemplateColumns: "276px 1fr", border: "1px solid #777", minHeight: 586 }}>
+        <main style={{ display: "grid", gridTemplateColumns: "276px 1fr", border: "1px solid #777", minHeight: 520 }}>
           <aside style={{ borderRight: "1px solid #777" }}>
-            <section style={{ minHeight: 164, borderBottom: "1px solid #777" }}>
+            <section style={{ minHeight: 148, borderBottom: "1px solid #777" }}>
               <div style={sectionHeader}>Personal and Check Information:</div>
               <div style={{ padding: "6px 8px" }}>
                 <div>{employeeName}</div>
@@ -1063,7 +1115,7 @@ function CharlesTemplatePreview({ data, templateKey }: { data: GeneratorPaystubD
           </aside>
 
           <section style={{ position: "relative" }}>
-            <div style={{ minHeight: 164, borderBottom: "1px solid #777" }}>
+            <div style={{ minHeight: 148, borderBottom: "1px solid #777" }}>
               <div style={gridRow("1fr 108px 66px 58px 88px 88px", { fontSize: 9, fontWeight: 900, textTransform: "uppercase", borderBottom: "1px solid #111" })}>
                 <div>Earnings</div>
                 <div>Description</div>
@@ -1080,7 +1132,7 @@ function CharlesTemplatePreview({ data, templateKey }: { data: GeneratorPaystubD
                 <div style={right}><Amount>{money(regularPay)}</Amount></div>
                 <div style={right}><Amount>{money(ytdGross)}</Amount></div>
               </div>
-              <div style={{ ...gridRow("1fr 108px 66px 58px 88px 88px", { marginTop: 34, fontWeight: 900 }) }}>
+              <div style={{ ...gridRow("1fr 108px 66px 58px 88px 88px", { marginTop: 22, fontWeight: 900 }) }}>
                 <div />
                 <div>Total Hours</div>
                 <div />
@@ -1114,7 +1166,7 @@ function CharlesTemplatePreview({ data, templateKey }: { data: GeneratorPaystubD
               </div>
             </div>
 
-            <div style={{ minHeight: 364 }}>
+            <div style={{ minHeight: 320 }}>
               <div style={gridRow("1fr 108px 92px 88px 88px", { fontSize: 9, fontWeight: 900, textTransform: "uppercase", borderBottom: "1px solid #111" })}>
                 <div>Withholdings</div>
                 <div>Description</div>
@@ -1145,7 +1197,7 @@ function CharlesTemplatePreview({ data, templateKey }: { data: GeneratorPaystubD
               </div>
             </div>
 
-            <footer style={{ position: "absolute", left: 8, right: 8, bottom: 0, display: "grid", gridTemplateColumns: "1fr 150px 150px", borderTop: "1px solid #111", minHeight: 42 }}>
+            <footer style={{ position: "absolute", left: 0, right: 0, bottom: 0, display: "grid", gridTemplateColumns: "1fr 150px 150px", borderTop: "1px solid #111", minHeight: 42 }}>
               <div style={{ fontWeight: 900, alignSelf: "start", paddingTop: 7 }}>NET PAY</div>
               <div style={{ borderLeft: "1px solid #777" }}>
                 <div style={{ textAlign: "center", fontSize: 9, paddingTop: 4 }}>THIS PERIOD ($)</div>
@@ -1159,7 +1211,7 @@ function CharlesTemplatePreview({ data, templateKey }: { data: GeneratorPaystubD
           </section>
         </main>
 
-        <footer style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, color: "#8a8a8a", fontSize: 9, padding: "8px 12px 0" }}>
+        <footer style={{ display: "grid", gridTemplateColumns: "1fr", gap: 8, color: "#8a8a8a", fontSize: 8, padding: "7px 12px 0" }}>
           <div>Payrolls by Paychex, Inc.</div>
           <div style={{ color: "#111" }}>{companyName} {companyAddress} {companyCity}</div>
         </footer>
@@ -1563,12 +1615,13 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
   const josePage: CSSProperties = {
     ...page,
     width: 860,
-    height: 1114,
-    minHeight: 1114,
+    height: 760,
+    minHeight: 760,
     border: "2px solid #111",
     padding: "18px 30px 24px",
-    fontSize: 10,
-    lineHeight: 1.08,
+    fontFamily: '"Arial Narrow", Arial, Helvetica, sans-serif',
+    fontSize: 8,
+    lineHeight: 1.04,
   }
   const joseCompany = data.companyName || "J PRICE ENERGY SERVICES LLC"
   const joseCompanyAddress = data.companyAddress || "PO BOX 485"
@@ -1597,7 +1650,7 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
     alignItems: "end",
     borderBottom: "0.5px solid #111",
     fontWeight: 700,
-    paddingBottom: 6,
+    paddingBottom: 3,
     lineHeight: 1,
   }
   const joseSmallLabel: CSSProperties = {
@@ -1605,7 +1658,7 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
     justifySelf: "center",
     background: "#fff",
     padding: "0 2px 1px",
-    fontSize: 7,
+    fontSize: 6.2,
     fontWeight: 700,
     textTransform: "uppercase",
     lineHeight: 1,
@@ -1615,32 +1668,32 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
     border: "0.5px solid #d2d2d2",
     background:
       "repeating-linear-gradient(-18deg, #eeeeee 0, #eeeeee 1px, #fafafa 1px, #fafafa 3px)",
-    padding: "3px 6px",
+    padding: "2px 5px",
     fontWeight: 800,
   }
   const joseHeaderCell: CSSProperties = {
     display: "grid",
-    gridTemplateRows: "10px 13px",
+    gridTemplateRows: "9px 12px",
     alignItems: "center",
     justifyItems: "center",
     background:
       "repeating-linear-gradient(0deg, #e7e7e7 0, #e7e7e7 1px, #f4f4f4 1px, #f4f4f4 2px)",
     borderRight: "1px solid #d4d4d4",
-    fontSize: 8,
+    fontSize: 7,
     lineHeight: 1,
     minWidth: 0,
   }
   const joseHeaderLabel: CSSProperties = {
-    fontSize: 6,
+    fontSize: 5.4,
     fontWeight: 700,
     textTransform: "uppercase",
     whiteSpace: "nowrap",
   }
   const joseHeaderValue: CSSProperties = {
-    fontSize: 7,
+    fontSize: 6.4,
     whiteSpace: "nowrap",
   }
-  const joseMoneyCell: CSSProperties = { textAlign: "right", fontSize: 9 }
+  const joseMoneyCell: CSSProperties = { textAlign: "right", fontSize: 8 }
   const joseCompactSummaryLabel: CSSProperties = {
     ...joseSummaryLabel,
     padding: "2px 4px",
@@ -1648,14 +1701,19 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
   }
 
   return (
-    <div id="paystub-capture-target" data-template={templateKey} className="bg-white overflow-x-auto p-4">
+    <div
+      id="paystub-capture-target"
+      data-template={templateKey}
+      className={isJose ? "overflow-x-auto p-0" : "bg-white overflow-x-auto p-4"}
+      style={isJose ? { width: "fit-content", margin: "0 auto", background: "transparent" } : undefined}
+    >
       <div data-pdf-page="true" style={isJose ? josePage : page}>
         <div
           data-template-watermark
           style={{
             position: "absolute",
             left: isJose ? 30 : 110,
-            top: isJose ? 812 : 610,
+            top: isJose ? 500 : 610,
             transform: "rotate(-19deg)",
             color: "rgba(78,78,78,0.36)",
             fontSize: isJose ? 36 : 92,
@@ -1669,7 +1727,7 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
           {isJose ? "THIS IS NOT A CHECK" : "PREVIEW ONLY"}
         </div>
 
-        <header style={{ display: "grid", gridTemplateColumns: "292px 1fr 36px", gap: 24, alignItems: "start" }}>
+        <header style={{ display: "grid", gridTemplateColumns: "292px 1fr 62px", gap: 24, alignItems: "start" }}>
           <div>
             <div
               style={{
@@ -1703,13 +1761,15 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
           </div>
 
           <div style={{ paddingTop: 2 }}>
-            <h1 style={{ fontSize: 22, lineHeight: 1, margin: "0 0 17px", fontWeight: 800 }}>Earnings Statement</h1>
-            <InfoLine label="Period Start:" value={josePayStart} />
-            <InfoLine label="Period Ending:" value={josePayEnd} />
-            <InfoLine label="Pay Date:" value={josePayDate} />
+            <h1 style={{ fontSize: 18, lineHeight: 1, margin: "0 0 17px", fontWeight: 900 }}>Earnings Statement</h1>
+            <div style={{ fontSize: 8, lineHeight: 1.08 }}>
+              <InfoLine label="Period Start:" value={josePayStart} />
+              <InfoLine label="Period Ending:" value={josePayEnd} />
+              <InfoLine label="Pay Date:" value={josePayDate} />
+            </div>
           </div>
 
-          <div style={{ paddingTop: 12, textAlign: "right", overflow: "hidden" }}>
+          <div style={{ paddingTop: 8, textAlign: "right", overflow: "hidden" }}>
             {data.companyLogo ? (
               <img
                 src={data.companyLogo}
@@ -1717,14 +1777,14 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
                 style={{ maxWidth: 56, maxHeight: 44, marginLeft: "auto", objectFit: "contain", display: "block" }}
               />
             ) : (
-              <div />
+              <div style={{ fontSize: 30, lineHeight: 0.85, fontWeight: 900, letterSpacing: -4, fontStyle: "italic" }}>ADP</div>
             )}
           </div>
         </header>
 
         <section style={{ display: "grid", gridTemplateColumns: "292px 1fr", gap: 72, marginTop: 26 }}>
           <div>
-            <div style={{ display: "grid", gridTemplateColumns: "104px 1fr", columnGap: 8, fontSize: 7, lineHeight: 1.05, marginLeft: 34 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "104px 1fr", columnGap: 8, fontSize: 6.7, lineHeight: 1.04, marginLeft: 34 }}>
               <span>Taxable Marital Status:</span>
               <span className="calc-val">{taxStatus}</span>
               <span>Exemptions/Allowances:</span>
@@ -1734,12 +1794,12 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
               <span style={{ paddingLeft: 28 }}>GA:</span>
               <span className="calc-val">{data.exemptions || 0}</span>
             </div>
-            <div style={{ marginTop: 18, marginLeft: 34, fontSize: 7 }}>
+            <div style={{ marginTop: 18, marginLeft: 34, fontSize: 6.7 }}>
               Social Security Number: <span className="calc-val" style={{ marginLeft: 24 }}>{maskSSN(data.employeeSSN)}</span>
             </div>
           </div>
 
-          <div style={{ paddingTop: 6, paddingLeft: 0, fontSize: 13, lineHeight: 1.03, fontWeight: 800, textTransform: "uppercase" }}>
+          <div style={{ paddingTop: 6, paddingLeft: 0, fontSize: 11, lineHeight: 1.02, fontWeight: 900, textTransform: "uppercase" }}>
             <div className="calc-val">{joseEmployee}</div>
             <div className="calc-val">{joseEmployeeAddress}</div>
             <div className="calc-val">{joseEmployeeCity}</div>
@@ -1749,13 +1809,13 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
         <main style={{ display: "grid", gridTemplateColumns: "352px 260px", gap: 23, marginTop: 40 }}>
           <section>
             <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "84px 52px 52px 72px 78px", paddingBottom: 2 }}>
-              <div style={{ fontSize: 9, textDecoration: "underline" }}>Earnings</div>
+              <div style={{ fontSize: 8.5, textDecoration: "underline" }}>Earnings</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "rate" : <SmallLabel>rate</SmallLabel>}</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "hours" : <SmallLabel>hours</SmallLabel>}</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "this period" : <SmallLabel>this period</SmallLabel>}</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "year to date" : <SmallLabel>year to date</SmallLabel>}</div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "84px 52px 52px 72px 78px", paddingTop: 3, fontSize: 9 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "84px 52px 52px 72px 78px", paddingTop: 3, fontSize: 8 }}>
               <div>Regular</div>
               <div style={joseMoneyCell}><Amount>{money(joseRegularRate)}</Amount></div>
               <div style={joseMoneyCell}><Amount>{money(joseRegularHours)}</Amount></div>
@@ -1763,15 +1823,15 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
               <div style={joseMoneyCell}><Amount>{money(joseYtdGross)}</Amount></div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 23, marginLeft: 84, alignItems: "center", fontSize: 9 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 23, marginLeft: 84, alignItems: "center", fontSize: 8 }}>
               <div style={isJose ? joseCompactSummaryLabel : summaryLabel}>Gross Pay</div>
               <div style={joseMoneyCell}><Amount bold>{money(joseRegularPay)}</Amount></div>
               <div style={joseMoneyCell}><Amount>{money(joseYtdGross)}</Amount></div>
             </div>
 
             <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "84px 98px 64px 78px", marginTop: 24, paddingBottom: 2 }}>
-              <div style={{ fontSize: 9, textDecoration: "underline" }}>Deductions</div>
-              <div style={{ fontSize: 9, fontWeight: 700 }}>Statutory</div>
+              <div style={{ fontSize: 8.5, textDecoration: "underline" }}>Deductions</div>
+              <div style={{ fontSize: 8.5, fontWeight: 700 }}>Statutory</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "this period" : <SmallLabel>this period</SmallLabel>}</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "year to date" : <SmallLabel>year to date</SmallLabel>}</div>
             </div>
@@ -1781,7 +1841,7 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
               ["Social Security Tax", joseSocialSecurity, joseYtdSocialSecurity],
               ["Medicare Tax", joseMedicare, joseYtdMedicare],
             ].map(([label, current, ytd]) => (
-              <div key={String(label)} style={{ display: "grid", gridTemplateColumns: "84px 98px 64px 78px", paddingTop: 3, fontSize: 9 }}>
+              <div key={String(label)} style={{ display: "grid", gridTemplateColumns: "84px 98px 64px 78px", paddingTop: 3, fontSize: 8 }}>
                 <div />
                 <div>{label}</div>
                 <div style={joseMoneyCell}><Amount>{money(Number(current))}</Amount></div>
@@ -1789,55 +1849,55 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
               </div>
             ))}
 
-            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 8, marginLeft: 84, alignItems: "center", fontSize: 9 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 8, marginLeft: 84, alignItems: "center", fontSize: 8 }}>
               <div style={isJose ? joseCompactSummaryLabel : summaryLabel}>Deduction Total</div>
               <div style={joseMoneyCell}><Amount bold>{money(joseDeductions)}</Amount></div>
               <div style={joseMoneyCell}><Amount>{money(joseFederal + joseSocialSecurity + joseMedicare)}</Amount></div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 5, marginLeft: 84, alignItems: "center", fontSize: 9 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 5, marginLeft: 84, alignItems: "center", fontSize: 8 }}>
               <div style={isJose ? joseCompactSummaryLabel : summaryLabel}>Net Pay</div>
               <div style={joseMoneyCell}><Amount bold>{money(joseNetPay)}</Amount></div>
               <div style={joseMoneyCell}><Amount>{money(joseYtdGross - (joseYtdFederal + joseYtdSocialSecurity + joseYtdMedicare))}</Amount></div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginLeft: 84, paddingTop: 3, fontSize: 9 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginLeft: 84, paddingTop: 3, fontSize: 8 }}>
               <div style={{ paddingLeft: 39 }}>Checking</div>
               <div style={joseMoneyCell}><Amount>{money(-joseNetPay)}</Amount></div>
               <div style={joseMoneyCell}><Amount>{money(0)}</Amount></div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 4, marginLeft: 84, alignItems: "center", fontSize: 9 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 4, marginLeft: 84, alignItems: "center", fontSize: 8 }}>
               <div style={isJose ? joseCompactSummaryLabel : summaryLabel}>Net Check</div>
               <div style={joseMoneyCell}><Amount bold>{money(0)}</Amount></div>
               <div />
             </div>
 
-            <div style={{ marginTop: 16, paddingLeft: 84, fontWeight: 800, fontSize: 9 }}>* Excluded from federal taxable wages</div>
-            <div style={{ marginTop: 9, paddingLeft: 97, fontSize: 9 }}>
+            <div style={{ marginTop: 16, paddingLeft: 84, fontWeight: 800, fontSize: 8.5 }}>* Excluded from federal taxable wages</div>
+            <div style={{ marginTop: 9, paddingLeft: 97, fontSize: 8.5 }}>
               Your federal taxable wages this period are <Amount>{money(joseRegularPay)}</Amount>
             </div>
           </section>
 
           <section>
             <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "1fr 73px 66px", paddingBottom: 2 }}>
-              <div style={{ fontSize: 9, textDecoration: "underline", lineHeight: 1 }}>Other Benefits and<br />Information</div>
+              <div style={{ fontSize: 8.5, textDecoration: "underline", lineHeight: 1 }}>Other Benefits and<br />Information</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "this period" : <SmallLabel>this period</SmallLabel>}</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "total to date" : <SmallLabel>total to date</SmallLabel>}</div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 73px 66px", rowGap: 4, padding: "4px 0 24px", fontSize: 9 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 73px 66px", rowGap: 4, padding: "4px 0 24px", fontSize: 8.5 }}>
               <div>BASIS OF PAY: {data.payType === "salary" ? "SALARY" : "HOURLY"}</div>
               <div />
               <div />
             </div>
 
-            <div style={{ borderBottom: "0.5px solid #111", fontWeight: 700, fontSize: 9, marginTop: 5, paddingBottom: 2, textDecoration: "underline" }}>Information</div>
-            <div style={{ paddingTop: 5, fontSize: 9 }}>COMPANY PH# {formatPhone(data.companyPhone) || "(580) 786-0575"}</div>
+            <div style={{ borderBottom: "0.5px solid #111", fontWeight: 700, fontSize: 8.5, marginTop: 5, paddingBottom: 2, textDecoration: "underline" }}>Information</div>
+            <div style={{ paddingTop: 5, fontSize: 8.5 }}>COMPANY PH# {formatPhone(data.companyPhone) || "(580) 786-0575"}</div>
           </section>
         </main>
 
-        <footer style={{ position: "absolute", left: 42, right: 38, bottom: 72 }}>
+        <footer style={{ position: "absolute", left: 42, right: 38, bottom: 134 }}>
           <div style={{ position: "absolute", right: 0, top: -54, fontSize: 5 }}>(c) 2006 ADP, LLC</div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "250px 206px 1fr", gap: 34, alignItems: "start", marginBottom: 37, fontSize: 9 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "250px 206px 1fr", gap: 34, alignItems: "start", marginBottom: 37, fontSize: 8.5 }}>
             <div style={{ fontStyle: "italic", fontWeight: 700 }}>
               <div>{joseCompany}</div>
               <div>{joseCompanyAddress}</div>
@@ -1852,14 +1912,14 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
             </div>
           </div>
 
-          <div style={{ borderBottom: "0.5px solid #111", paddingBottom: 2, display: "grid", gridTemplateColumns: "282px 98px 45px 45px 91px", gap: 0, fontSize: 8, fontWeight: 700 }}>
+          <div style={{ borderBottom: "0.5px solid #111", paddingBottom: 2, display: "grid", gridTemplateColumns: "282px 98px 45px 45px 91px", gap: 0, fontSize: 7.5, fontWeight: 700 }}>
             <div>Deposited to the account of</div>
             <div>Account number</div>
             <div>Transit</div>
             <div>ABA</div>
             <div style={{ textAlign: "right" }}>Amount</div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "282px 98px 45px 45px 91px", gap: 0, fontSize: 8, paddingTop: 4 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "282px 98px 45px 45px 91px", gap: 0, fontSize: 7.5, paddingTop: 4 }}>
             <strong className="calc-val">{joseEmployee}</strong>
             <span className="calc-val">{data.accountNumber || `xxxxx${accountSuffix}`}</span>
             <span className="calc-val">{data.transitNumber || "xxxx"}</span>

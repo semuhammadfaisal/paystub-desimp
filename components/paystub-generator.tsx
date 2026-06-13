@@ -260,6 +260,7 @@ export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGene
     templateId: initialTemplateId || initialData.templateId,
   }))
   const previewData = useDeferredValue(paystubData)
+  const isTightPdfPreview = paystubData.templateId === "template5" || paystubData.templateId === "template6" || paystubData.templateId === "template8" || paystubData.templateId === "template9"
 
   const updatePaystubData = useCallback((updates: Partial<PaystubData>) => {
     setPaystubData((prev) => {
@@ -434,8 +435,14 @@ export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGene
             </div>
           </div>
         </div>
-        <div className="overflow-auto bg-[#f6f7f9] p-3 sm:p-5">
-          <div className="mx-auto w-full min-w-[720px] max-w-[900px] origin-top rounded-md bg-white shadow-sm ring-1 ring-gray-200">
+        <div className={`overflow-auto bg-[#f6f7f9] ${isTightPdfPreview ? "p-0" : "p-3 sm:p-5"}`}>
+          <div
+            className={
+              isTightPdfPreview
+                ? "mx-auto w-fit min-w-0 max-w-none origin-top bg-transparent shadow-none ring-0"
+                : "mx-auto w-full min-w-[720px] max-w-[900px] origin-top rounded-md bg-white shadow-sm ring-1 ring-gray-200"
+            }
+          >
             <PaystubPreview data={previewData} />
           </div>
         </div>
