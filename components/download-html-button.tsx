@@ -112,7 +112,7 @@ export function DownloadHtmlButton({ data, label = "Download PDF (HTML)" }: Prop
       type="button"
       onClick={onClick}
       disabled={loading}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-md border text-sm font-medium bg-white hover:bg-gray-50"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 sm:w-auto"
     >
       <Download className="w-4 h-4" />
       {loading ? 'Generating…' : label}

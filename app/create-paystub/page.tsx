@@ -1,9 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { PaystubGenerator } from "@/components/paystub-generator"
-import { PageHeader } from "@/components/page-header"
-import { Button } from "@/components/ui/button"
-import { MessageCircle } from "lucide-react"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 
 export default async function CreatePaystubPage({
   searchParams,
@@ -23,52 +22,25 @@ export default async function CreatePaystubPage({
   const { template } = await searchParams
 
   return (
-    <div className="saas-shell min-h-screen">
-      <PageHeader />
-      <div className="relative mx-auto max-w-[1500px] px-4 py-8 sm:px-6 lg:px-8">
-        <div className="relative mb-10">
-          <div className="saas-card overflow-hidden p-8 sm:p-10 lg:p-12">
-            <div className="text-center">
-              <div className="mb-8 flex justify-center">
-                <div className="rounded-2xl bg-primary p-4 shadow-sm">
-                    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-              </div>
-              <h1 className="mb-6 text-4xl font-black tracking-tight md:text-6xl">
-                <span className="text-gray-900">Create Your </span>
-                <span className="text-primary">
-                  Paystub
-                </span>
-              </h1>
-              <p className="mx-auto max-w-3xl text-xl font-light leading-relaxed text-gray-600">Professional paystubs in 3 simple steps</p>
+    <div className="paystub-builder saas-shell min-h-screen">
+      <Header />
+      <main className="relative mx-auto max-w-[1280px] px-3 py-4 sm:px-5 lg:px-6">
+        <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight text-gray-950 sm:text-2xl">Create paystub</h1>
+              <p className="mt-1 text-sm text-gray-500">Preview first, edit details below, then export when ready.</p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              Autosaving locally
             </div>
           </div>
         </div>
 
-        {/* Template selection now handled by dropdown inside PaystubGenerator */}
-
         <PaystubGenerator user={user} initialTemplateId={typeof template === 'string' ? template : 'template2'} />
-
-        {/* Expert Help CTA */}
-        <section className="mt-16">
-          <div className="saas-card p-6 sm:p-8">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Need Expert Assistance?</h3>
-                <p className="text-gray-600">Let our professionals create your paystub with 100% accuracy and compliance</p>
-              </div>
-              <a href="https://wa.me/12067045757" target="_blank" rel="noopener noreferrer">
-                <Button className="bg-[#25D366] hover:bg-[#20bd5a] text-white px-6 py-3 rounded-xl font-medium">
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Get Expert Help
-                </Button>
-              </a>
-            </div>
-          </div>
-        </section>
-      </div>
+      </main>
+      <Footer />
     </div>
   )
 }

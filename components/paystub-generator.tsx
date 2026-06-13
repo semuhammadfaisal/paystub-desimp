@@ -8,8 +8,7 @@ import { StepHeader } from "@/components/step-header"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DownloadHtmlButton } from "@/components/download-html-button"
 import { DownloadHtmlFileButton } from "@/components/download-html-file-button"
-import { Button } from "@/components/ui/button"
-import { MessageCircle } from "lucide-react"
+import { FileText, MessageCircle } from "lucide-react"
 
 export interface PaystubData {
   // Template Selection
@@ -250,6 +249,11 @@ const getMaxPaystubs = (frequency: string | undefined): number => {
   }
 }
 
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+})
+
 export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGeneratorProps) {
   const [paystubData, setPaystubData] = useState<PaystubData>(() => ({
     ...initialData,
@@ -363,18 +367,25 @@ export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGene
     })
   }, [])
 
-  
+  const formatCurrency = (amount: number) => currencyFormatter.format(amount || 0)
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-8">
-        {/* Template & Color Selection */}
-        <div className="saas-card p-5 sm:p-6">
-          <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-              <span className="text-sm font-semibold uppercase tracking-wide text-gray-600">Template:</span>
+    <div className="space-y-5">
+      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <FileText className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-gray-950">Document setup</h2>
+            <p className="text-xs text-gray-500">Choose a template and accent color.</p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="grid gap-2 sm:grid-cols-[auto_minmax(180px,240px)] sm:items-center">
+              <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Template</span>
               <Select value={paystubData.templateId} onValueChange={(v) => updatePaystubData({ templateId: v })}>
-                <SelectTrigger className="h-11 w-full sm:w-56">
+                <SelectTrigger className="h-10 w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -383,71 +394,76 @@ export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGene
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+          </div>
             
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-              <span className="text-sm font-semibold uppercase tracking-wide text-gray-600">Color:</span>
-              <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Color</span>
+            <div className="flex flex-wrap gap-2">
                 {THEME_OPTIONS.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => updatePaystubData({ themeId: t.id, themeColor: t.color })}
-                    className={`h-9 w-9 rounded-full border-2 shadow-sm transition-all duration-200 hover:scale-105 ${paystubData.themeId === t.id ? 'scale-110 border-gray-800 ring-4 ring-gray-200' : 'border-gray-300'}`}
+                    className={`h-7 w-7 rounded-full border shadow-sm transition-all duration-200 hover:scale-105 ${paystubData.themeId === t.id ? 'scale-110 border-gray-900 ring-2 ring-gray-200' : 'border-gray-300'}`}
                     style={{ backgroundColor: t.color }}
+                    aria-label={`Use ${t.id} theme`}
                   />
                 ))}
-              </div>
             </div>
           </div>
         </div>
-
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(460px,0.92fr)] xl:items-start">
-          <div className="space-y-8">
-            <div className="saas-card p-6 sm:p-8">
-              <StepHeader step={1} title="Company Logo" />
-              <LogoUpload 
-                logo={paystubData.companyLogo} 
-                onLogoChange={(logo) => updatePaystubData({ companyLogo: logo })} 
-              />
-            </div>
-
-            <PaystubForm data={paystubData} onUpdate={updatePaystubData} />
-          </div>
-
-          <aside className="xl:sticky xl:top-28">
-            <div className="saas-card overflow-hidden">
-              <div className="flex items-center justify-end border-b border-gray-200 bg-gray-50 px-5 py-4">
-                <div className="h-2.5 w-2.5 rounded-full bg-primary" />
-              </div>
-              <div className="max-h-[calc(100vh-210px)] overflow-auto bg-gray-50/60 p-3 sm:p-5">
-                <div className="mx-auto w-full min-w-[720px] origin-top rounded-xl bg-white shadow-sm xl:min-w-0">
-                  <PaystubPreview data={previewData} />
-                </div>
-              </div>
-            </div>
-
-            {/* Custom Templates CTA */}
-            <div className="mt-5 flex justify-center">
-              <a
-                href={`https://wa.me/12067045757?text=${encodeURIComponent("Hi! I'm interested in personalized and customized paystub templates. Can you help me?")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button className="px-6 py-3 font-medium text-white">
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Get Custom Templates
-                </Button>
-              </a>
-            </div>
-          </aside>
-        </div>
-
-        {/* Color options moved to top */}
-
-        {/* Template selection and preview moved to top */}
       </div>
 
-      <div className="saas-card flex flex-col items-center justify-center gap-4 p-5 sm:flex-row sm:p-6">
+      <section className="rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-gray-200 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-950">Preview</h2>
+            <p className="text-xs text-gray-500">Live document preview updates as you edit.</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-xs sm:min-w-[420px]">
+            <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+              <div className="text-gray-500">Gross</div>
+              <div className="font-semibold text-gray-950">{formatCurrency(paystubData.grossPay)}</div>
+            </div>
+            <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+              <div className="text-gray-500">Deductions</div>
+              <div className="font-semibold text-gray-950">{formatCurrency(paystubData.totalDeductions)}</div>
+            </div>
+            <div className="rounded-md border border-gray-200 bg-primary/5 px-3 py-2">
+              <div className="text-gray-500">Net</div>
+              <div className="font-semibold text-primary">{formatCurrency(paystubData.netPay)}</div>
+            </div>
+          </div>
+        </div>
+        <div className="overflow-auto bg-[#f6f7f9] p-3 sm:p-5">
+          <div className="mx-auto w-full min-w-[720px] max-w-[900px] origin-top rounded-md bg-white shadow-sm ring-1 ring-gray-200">
+            <PaystubPreview data={previewData} />
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm lg:sticky lg:top-20">
+          <StepHeader step={1} title="Company Logo" />
+          <LogoUpload
+            logo={paystubData.companyLogo}
+            onLogoChange={(logo) => updatePaystubData({ companyLogo: logo })}
+          />
+        </div>
+
+        <PaystubForm data={paystubData} onUpdate={updatePaystubData} />
+      </div>
+
+      <div className="sticky bottom-3 z-20 flex flex-col gap-3 rounded-lg border border-gray-200 bg-white/95 p-3 shadow-lg backdrop-blur md:flex-row md:items-center md:justify-between">
+        <a
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+          href={`https://wa.me/12067045757?text=${encodeURIComponent("Hi! I'm interested in personalized and customized paystub templates. Can you help me?")}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <MessageCircle className="h-4 w-4" />
+          Custom template
+        </a>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <DownloadHtmlButton
           data={paystubData}
           label="Download PDF"
@@ -456,8 +472,9 @@ export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGene
           <DownloadHtmlFileButton 
             data={paystubData} 
             label="Complete Order" 
-            className="relative bg-primary px-10 py-4 text-lg font-bold text-white shadow-md transition-all duration-200 hover:bg-primary/90 hover:shadow-lg" 
+            className="relative inline-flex w-full items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 sm:w-auto" 
           />
+        </div>
         </div>
       </div>
     </div>

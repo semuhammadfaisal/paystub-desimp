@@ -64,20 +64,15 @@ export function LogoUpload({ logo, onLogoChange }: LogoUploadProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Company Logo</h3>
-        <span className="text-sm text-muted-foreground">(Optional)</span>
-      </div>
-      
+    <div className="space-y-3">
       {logo ? (
         <div className="relative">
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-3">
             <div className="flex items-center justify-center">
               <img 
                 src={logo} 
                 alt="Company Logo" 
-                className="max-h-32 max-w-full object-contain"
+                className="max-h-24 max-w-full object-contain"
               />
             </div>
           </div>
@@ -93,7 +88,7 @@ export function LogoUpload({ logo, onLogoChange }: LogoUploadProps) {
         </div>
       ) : (
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+          className={`rounded-lg border border-dashed p-4 text-center transition-colors ${
             isDragging 
               ? 'border-primary bg-primary/5' 
               : 'border-gray-300 hover:border-gray-400'
@@ -102,27 +97,22 @@ export function LogoUpload({ logo, onLogoChange }: LogoUploadProps) {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
         >
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex justify-center">
-              <Image className="h-12 w-12 text-gray-400" />
+              <Image className="h-8 w-8 text-gray-400" />
             </div>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Upload your company logo</p>
-              <p className="text-xs text-muted-foreground">
-                Drag and drop an image file here, or click to browse
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Supports: JPG, PNG, GIF (Max 5MB)
-              </p>
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Upload logo</p>
+              <p className="text-xs text-muted-foreground">PNG, JPG, or GIF</p>
             </div>
             <Button
               type="button"
               variant="outline"
               onClick={handleUploadClick}
-              className="mt-4"
+              className="h-9"
             >
               <Upload className="h-4 w-4 mr-2" />
-              Choose File
+              Choose file
             </Button>
           </div>
         </div>

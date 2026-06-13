@@ -280,6 +280,87 @@
   .paystub-form-surface table tbody tr {
     @apply transition-colors hover:bg-gray-50/70;
   }
+
+  .paystub-builder h1,
+  .paystub-builder h2,
+  .paystub-builder h3 {
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit !important;
+  }
+
+  .paystub-builder .saas-shell {
+    background-size: auto, 40px 40px, 40px 40px;
+  }
+
+  .paystub-builder .saas-card {
+    @apply rounded-lg shadow-sm;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  }
+
+  .paystub-builder .paystub-form-surface {
+    @apply space-y-5;
+  }
+
+  .paystub-builder .paystub-form-surface > div > .saas-card,
+  .paystub-builder .paystub-form-surface > .saas-card {
+    @apply rounded-lg border-gray-200 p-4 sm:p-5;
+  }
+
+  .paystub-builder .paystub-form-surface .mb-8.flex.items-center {
+    @apply mb-4 gap-3;
+  }
+
+  .paystub-builder .paystub-form-surface .mb-8.flex.items-center > div:first-child {
+    @apply h-7 w-7 rounded-md text-xs font-semibold;
+  }
+
+  .paystub-builder .paystub-form-surface .mb-8.flex.items-center h2 {
+    @apply text-base font-semibold tracking-tight text-gray-950;
+  }
+
+  .paystub-builder .paystub-form-surface .mb-6.text-sm.text-gray-500 {
+    @apply mb-4 text-xs;
+  }
+
+  .paystub-builder .paystub-form-surface .grid.gap-6 {
+    @apply gap-4;
+  }
+
+  .paystub-builder .paystub-form-surface .space-y-6 {
+    @apply space-y-4;
+  }
+
+  .paystub-builder .paystub-form-surface .space-y-3 {
+    @apply space-y-2;
+  }
+
+  .paystub-builder .saas-field,
+  .paystub-builder .paystub-form-surface [data-slot="input"],
+  .paystub-builder .paystub-form-surface [data-slot="select-trigger"] {
+    @apply h-10 min-h-10 rounded-md text-sm;
+  }
+
+  .paystub-builder .paystub-form-surface [data-slot="toggle-group-item"] {
+    @apply min-h-9 rounded-md text-xs font-semibold;
+  }
+
+  .paystub-builder .paystub-form-surface .rounded-xl {
+    @apply rounded-lg;
+  }
+
+  .paystub-builder .paystub-form-surface .rounded-2xl {
+    @apply rounded-lg;
+  }
+
+  .paystub-builder .saas-table {
+    @apply rounded-lg;
+  }
+
+  .paystub-builder .saas-table th,
+  .paystub-builder .saas-table td {
+    @apply p-3 text-xs;
+  }
 }
 
 /* Preview-only blur for calculated values. The visible preview wrapper gets the
