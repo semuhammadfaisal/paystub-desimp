@@ -1546,9 +1546,37 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
   const joseSummaryLabel: CSSProperties = {
     border: "0.5px solid #d2d2d2",
     background:
-      "repeating-linear-gradient(-18deg, #f3f3f3 0, #f3f3f3 1px, #ffffff 1px, #ffffff 3px)",
+      "repeating-linear-gradient(-18deg, #eeeeee 0, #eeeeee 1px, #fafafa 1px, #fafafa 3px)",
     padding: "3px 6px",
     fontWeight: 800,
+  }
+  const joseHeaderCell: CSSProperties = {
+    display: "grid",
+    gridTemplateRows: "10px 13px",
+    alignItems: "center",
+    justifyItems: "center",
+    background:
+      "repeating-linear-gradient(0deg, #e7e7e7 0, #e7e7e7 1px, #f4f4f4 1px, #f4f4f4 2px)",
+    borderRight: "1px solid #d4d4d4",
+    fontSize: 8,
+    lineHeight: 1,
+    minWidth: 0,
+  }
+  const joseHeaderLabel: CSSProperties = {
+    fontSize: 6,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    whiteSpace: "nowrap",
+  }
+  const joseHeaderValue: CSSProperties = {
+    fontSize: 7,
+    whiteSpace: "nowrap",
+  }
+  const joseMoneyCell: CSSProperties = { textAlign: "right", fontSize: 9 }
+  const joseCompactSummaryLabel: CSSProperties = {
+    ...joseSummaryLabel,
+    padding: "2px 4px",
+    lineHeight: 1,
   }
 
   return (
@@ -1558,11 +1586,11 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
           data-template-watermark
           style={{
             position: "absolute",
-            left: isJose ? 92 : 110,
-            top: isJose ? 610 : 610,
+            left: isJose ? 30 : 110,
+            top: isJose ? 812 : 610,
             transform: "rotate(-19deg)",
             color: "rgba(78,78,78,0.36)",
-            fontSize: isJose ? 46 : 92,
+            fontSize: isJose ? 36 : 92,
             fontWeight: 800,
             letterSpacing: isJose ? 2 : 6,
             whiteSpace: "nowrap",
@@ -1570,49 +1598,65 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
             zIndex: 20,
           }}
         >
-          {isJose ? "SAMPLE - NOT A CHECK" : "PREVIEW ONLY"}
+          {isJose ? "THIS IS NOT A CHECK" : "PREVIEW ONLY"}
         </div>
 
-        <header style={{ display: "grid", gridTemplateColumns: "1fr 1fr 88px", gap: 22, alignItems: "start" }}>
+        <header style={{ display: "grid", gridTemplateColumns: "292px 1fr 36px", gap: 24, alignItems: "start" }}>
           <div>
-            <div style={{ display: "flex", gap: 8, width: 270, marginLeft: 88, marginBottom: 15 }}>
-              <HashBox label="CO." value={data.coNumber || "AE7"} />
-              <HashBox label="FILE" value={data.fileNumber || "000000"} />
-              <HashBox label="DEPT." value={data.deptNumber || "000130"} />
-              <HashBox label="CLOCK" value={data.clockNumber || "0000"} />
-              <HashBox label="VCHR. NO." value={data.vchrNumber || "030"} />
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "36px 58px 58px 58px 56px",
+                width: 266,
+                height: 23,
+                marginLeft: 28,
+                marginBottom: 15,
+              }}
+            >
+              {[
+                ["CO.", data.coNumber || "AE7"],
+                ["FILE", data.fileNumber || "138614"],
+                ["DEPT.", data.deptNumber || "000130"],
+                ["CLOCK", data.clockNumber || ""],
+                ["VCHR. NO.", data.vchrNumber || "030"],
+              ].map(([label, value], index) => (
+                <div key={String(label)} style={{ ...joseHeaderCell, borderRight: index === 4 ? 0 : joseHeaderCell.borderRight }}>
+                  <div style={joseHeaderLabel}>{label}</div>
+                  <div className="calc-val" style={joseHeaderValue}>{value}</div>
+                </div>
+              ))}
             </div>
 
-            <div style={{ fontStyle: "italic", fontWeight: 700, marginLeft: 90, marginTop: 8 }}>
+            <div style={{ fontStyle: "italic", fontWeight: 700, marginLeft: 34, marginTop: 8 }}>
               {joseCompany}
             </div>
-            <div style={{ fontStyle: "italic", marginLeft: 90 }}>{joseCompanyAddress}</div>
-            <div style={{ fontStyle: "italic", marginLeft: 90 }}>{joseCompanyCity}</div>
+            <div style={{ fontStyle: "italic", marginLeft: 34 }}>{joseCompanyAddress}</div>
+            <div style={{ fontStyle: "italic", marginLeft: 34 }}>{joseCompanyCity}</div>
           </div>
 
-          <div style={{ paddingTop: 12 }}>
-            <h1 style={{ fontSize: 22, lineHeight: 1, margin: "0 0 20px", fontWeight: 800 }}>Earnings Statement</h1>
+          <div style={{ paddingTop: 2 }}>
+            <h1 style={{ fontSize: 22, lineHeight: 1, margin: "0 0 17px", fontWeight: 800 }}>Earnings Statement</h1>
             <InfoLine label="Period Start:" value={josePayStart} />
             <InfoLine label="Period Ending:" value={josePayEnd} />
             <InfoLine label="Pay Date:" value={josePayDate} />
           </div>
 
-          <div style={{ paddingTop: 14, textAlign: "right" }}>
+          <div style={{ paddingTop: 12, textAlign: "right", overflow: "hidden" }}>
             {data.companyLogo ? (
               <img
                 src={data.companyLogo}
                 alt="Company logo"
-                style={{ maxWidth: 92, maxHeight: 54, marginLeft: "auto", objectFit: "contain", display: "block" }}
+                style={{ maxWidth: 56, maxHeight: 44, marginLeft: "auto", objectFit: "contain", display: "block" }}
               />
             ) : (
-              <div style={{ fontSize: 30, lineHeight: 0.9, fontWeight: 900, letterSpacing: -2 }}>SRS</div>
+              <div />
             )}
           </div>
         </header>
 
-        <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 76, marginTop: 38 }}>
+        <section style={{ display: "grid", gridTemplateColumns: "292px 1fr", gap: 72, marginTop: 26 }}>
           <div>
-            <div style={{ display: "grid", gridTemplateColumns: "122px 1fr", columnGap: 8, fontSize: 9, marginLeft: 90 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "104px 1fr", columnGap: 8, fontSize: 7, lineHeight: 1.05, marginLeft: 34 }}>
               <span>Taxable Marital Status:</span>
               <span className="calc-val">{taxStatus}</span>
               <span>Exemptions/Allowances:</span>
@@ -1622,43 +1666,44 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
               <span style={{ paddingLeft: 28 }}>GA:</span>
               <span className="calc-val">{data.exemptions || 0}</span>
             </div>
-            <div style={{ marginTop: 22, marginLeft: 90, fontSize: 9 }}>
-              Social Security Number: <span className="calc-val" style={{ marginLeft: 26 }}>{maskSSN(data.employeeSSN)}</span>
+            <div style={{ marginTop: 18, marginLeft: 34, fontSize: 7 }}>
+              Social Security Number: <span className="calc-val" style={{ marginLeft: 24 }}>{maskSSN(data.employeeSSN)}</span>
             </div>
           </div>
 
-          <div style={{ paddingTop: 22, paddingLeft: 12, fontSize: 15, lineHeight: 1.02, fontWeight: 800, textTransform: "uppercase" }}>
+          <div style={{ paddingTop: 6, paddingLeft: 0, fontSize: 13, lineHeight: 1.03, fontWeight: 800, textTransform: "uppercase" }}>
             <div className="calc-val">{joseEmployee}</div>
             <div className="calc-val">{joseEmployeeAddress}</div>
             <div className="calc-val">{joseEmployeeCity}</div>
           </div>
         </section>
 
-        <main style={{ display: "grid", gridTemplateColumns: "1.08fr 0.92fr", gap: 36, marginTop: 35 }}>
+        <main style={{ display: "grid", gridTemplateColumns: "352px 260px", gap: 23, marginTop: 40 }}>
           <section>
-            <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "1fr 68px 68px 88px 102px" }}>
-              <div style={{ fontSize: 13, textDecoration: "underline" }}>Earnings</div>
+            <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "84px 52px 52px 72px 78px", paddingBottom: 2 }}>
+              <div style={{ fontSize: 9, textDecoration: "underline" }}>Earnings</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "rate" : <SmallLabel>rate</SmallLabel>}</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "hours" : <SmallLabel>hours</SmallLabel>}</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "this period" : <SmallLabel>this period</SmallLabel>}</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "year to date" : <SmallLabel>year to date</SmallLabel>}</div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 68px 68px 88px 102px", paddingTop: 4, fontSize: 9 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "84px 52px 52px 72px 78px", paddingTop: 3, fontSize: 9 }}>
               <div>Regular</div>
-              <div style={{ textAlign: "right" }}><Amount>{money(joseRegularRate)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(joseRegularHours)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(joseRegularPay)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(joseYtdGross)}</Amount></div>
+              <div style={joseMoneyCell}><Amount>{money(joseRegularRate)}</Amount></div>
+              <div style={joseMoneyCell}><Amount>{money(joseRegularHours)}</Amount></div>
+              <div style={joseMoneyCell}><Amount>{money(joseRegularPay)}</Amount></div>
+              <div style={joseMoneyCell}><Amount>{money(joseYtdGross)}</Amount></div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 24, alignItems: "center", fontSize: 9 }}>
-              <div style={isJose ? joseSummaryLabel : summaryLabel}>Gross Pay</div>
-              <div style={{ textAlign: "right", paddingRight: 6 }}><Amount bold>{money(joseRegularPay)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(joseYtdGross)}</Amount></div>
+            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 23, marginLeft: 84, alignItems: "center", fontSize: 9 }}>
+              <div style={isJose ? joseCompactSummaryLabel : summaryLabel}>Gross Pay</div>
+              <div style={joseMoneyCell}><Amount bold>{money(joseRegularPay)}</Amount></div>
+              <div style={joseMoneyCell}><Amount>{money(joseYtdGross)}</Amount></div>
             </div>
 
-            <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "1fr 88px 102px", marginTop: 28 }}>
-              <div style={{ fontSize: 13, textDecoration: "underline" }}>Deductions <span style={{ marginLeft: 38, fontSize: 11, textDecoration: "none" }}>Statutory</span></div>
+            <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "84px 98px 64px 78px", marginTop: 24, paddingBottom: 2 }}>
+              <div style={{ fontSize: 9, textDecoration: "underline" }}>Deductions</div>
+              <div style={{ fontSize: 9, fontWeight: 700 }}>Statutory</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "this period" : <SmallLabel>this period</SmallLabel>}</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "year to date" : <SmallLabel>year to date</SmallLabel>}</div>
             </div>
@@ -1668,66 +1713,70 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
               ["Social Security Tax", joseSocialSecurity, joseYtdSocialSecurity],
               ["Medicare Tax", joseMedicare, joseYtdMedicare],
             ].map(([label, current, ytd]) => (
-              <div key={String(label)} style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", paddingTop: 4, fontSize: 9 }}>
-                <div style={{ paddingLeft: 98 }}>{label}</div>
-                <div style={{ textAlign: "right" }}><Amount>{money(Number(current))}</Amount></div>
-                <div style={{ textAlign: "right" }}><Amount>{money(Number(ytd))}</Amount></div>
+              <div key={String(label)} style={{ display: "grid", gridTemplateColumns: "84px 98px 64px 78px", paddingTop: 3, fontSize: 9 }}>
+                <div />
+                <div>{label}</div>
+                <div style={joseMoneyCell}><Amount>{money(Number(current))}</Amount></div>
+                <div style={joseMoneyCell}><Amount>{money(Number(ytd))}</Amount></div>
               </div>
             ))}
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 8, alignItems: "center", fontSize: 9 }}>
-              <div style={isJose ? joseSummaryLabel : summaryLabel}>Deduction Total</div>
-              <div style={{ textAlign: "right" }}><Amount bold>{money(joseDeductions)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(joseFederal + joseSocialSecurity + joseMedicare)}</Amount></div>
+            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 8, marginLeft: 84, alignItems: "center", fontSize: 9 }}>
+              <div style={isJose ? joseCompactSummaryLabel : summaryLabel}>Deduction Total</div>
+              <div style={joseMoneyCell}><Amount bold>{money(joseDeductions)}</Amount></div>
+              <div style={joseMoneyCell}><Amount>{money(joseFederal + joseSocialSecurity + joseMedicare)}</Amount></div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 8, alignItems: "center", fontSize: 9 }}>
-              <div style={isJose ? joseSummaryLabel : summaryLabel}>Net Pay</div>
-              <div style={{ textAlign: "right" }}><Amount bold>{money(joseNetPay)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(joseYtdGross - (joseYtdFederal + joseYtdSocialSecurity + joseYtdMedicare))}</Amount></div>
+            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 5, marginLeft: 84, alignItems: "center", fontSize: 9 }}>
+              <div style={isJose ? joseCompactSummaryLabel : summaryLabel}>Net Pay</div>
+              <div style={joseMoneyCell}><Amount bold>{money(joseNetPay)}</Amount></div>
+              <div style={joseMoneyCell}><Amount>{money(joseYtdGross - (joseYtdFederal + joseYtdSocialSecurity + joseYtdMedicare))}</Amount></div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", paddingTop: 5, fontSize: 9 }}>
-              <div style={{ paddingLeft: 98 }}>Checking</div>
-              <div style={{ textAlign: "right" }}><Amount>{money(-joseNetPay)}</Amount></div>
-              <div style={{ textAlign: "right" }}><Amount>{money(0)}</Amount></div>
+            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginLeft: 84, paddingTop: 3, fontSize: 9 }}>
+              <div style={{ paddingLeft: 39 }}>Checking</div>
+              <div style={joseMoneyCell}><Amount>{money(-joseNetPay)}</Amount></div>
+              <div style={joseMoneyCell}><Amount>{money(0)}</Amount></div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 88px 102px", marginTop: 5, alignItems: "center", fontSize: 9 }}>
-              <div style={isJose ? joseSummaryLabel : summaryLabel}>Net Check</div>
-              <div style={{ textAlign: "right" }}><Amount bold>{money(0)}</Amount></div>
+            <div style={{ display: "grid", gridTemplateColumns: "182px 64px 78px", marginTop: 4, marginLeft: 84, alignItems: "center", fontSize: 9 }}>
+              <div style={isJose ? joseCompactSummaryLabel : summaryLabel}>Net Check</div>
+              <div style={joseMoneyCell}><Amount bold>{money(0)}</Amount></div>
               <div />
             </div>
 
-            <div style={{ marginTop: 22, paddingLeft: 16, fontWeight: 800, fontSize: 9 }}>* Excluded from federal taxable wages</div>
-            <div style={{ marginTop: 10, paddingLeft: 16, fontSize: 9 }}>
+            <div style={{ marginTop: 16, paddingLeft: 84, fontWeight: 800, fontSize: 9 }}>* Excluded from federal taxable wages</div>
+            <div style={{ marginTop: 9, paddingLeft: 97, fontSize: 9 }}>
               Your federal taxable wages this period are <Amount>{money(joseRegularPay)}</Amount>
             </div>
           </section>
 
           <section>
-            <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "1fr 92px 102px" }}>
-              <div style={{ fontSize: 13, textDecoration: "underline", lineHeight: 1 }}>Other Benefits and<br />Information</div>
+            <div style={{ ...(isJose ? joseHeader : sectionHeader), gridTemplateColumns: "1fr 73px 66px", paddingBottom: 2 }}>
+              <div style={{ fontSize: 9, textDecoration: "underline", lineHeight: 1 }}>Other Benefits and<br />Information</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "this period" : <SmallLabel>this period</SmallLabel>}</div>
               <div style={isJose ? joseSmallLabel : undefined}>{isJose ? "total to date" : <SmallLabel>total to date</SmallLabel>}</div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 92px 102px", rowGap: 4, padding: "6px 0 24px", fontSize: 9 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 73px 66px", rowGap: 4, padding: "4px 0 24px", fontSize: 9 }}>
               <div>BASIS OF PAY: {data.payType === "salary" ? "SALARY" : "HOURLY"}</div>
               <div />
               <div />
             </div>
 
-            <div style={{ borderBottom: "0.5px solid #111", fontWeight: 700, fontSize: 13, marginTop: 8, paddingBottom: 6, textDecoration: "underline" }}>Information</div>
-            <div style={{ paddingTop: 8, fontSize: 9 }}>COMPANY PH# {formatPhone(data.companyPhone) || "(580) 786-0575"}</div>
+            <div style={{ borderBottom: "0.5px solid #111", fontWeight: 700, fontSize: 9, marginTop: 5, paddingBottom: 2, textDecoration: "underline" }}>Information</div>
+            <div style={{ paddingTop: 5, fontSize: 9 }}>COMPANY PH# {formatPhone(data.companyPhone) || "(580) 786-0575"}</div>
           </section>
         </main>
 
-        <footer style={{ position: "absolute", left: 142, right: 30, bottom: 118 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 96, marginBottom: 22, fontSize: 9 }}>
+        <footer style={{ position: "absolute", left: 42, right: 38, bottom: 72 }}>
+          <div style={{ position: "absolute", right: 0, top: -54, fontSize: 5 }}>(c) 2006 ADP, LLC</div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "250px 206px 1fr", gap: 34, alignItems: "start", marginBottom: 37, fontSize: 9 }}>
             <div style={{ fontStyle: "italic", fontWeight: 700 }}>
               <div>{joseCompany}</div>
               <div>{joseCompanyAddress}</div>
               <div>{joseCompanyCity}</div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "130px 1fr", rowGap: 6 }}>
+            <div />
+            <div style={{ display: "grid", gridTemplateColumns: "105px 1fr", rowGap: 6 }}>
               <strong>Advice number:</strong>
               <strong className="calc-val">{joseAdviceNumber}</strong>
               <span>Pay date:</span>
@@ -1735,21 +1784,21 @@ export function PdfTemplatePreview({ data, templateName, templateKey }: PdfTempl
             </div>
           </div>
 
-          <div style={{ borderTop: "0.5px solid #111", paddingTop: 8, display: "grid", gridTemplateColumns: "1.6fr 1fr 0.7fr 0.7fr 0.9fr", gap: 12, fontSize: 9, fontWeight: 700 }}>
+          <div style={{ borderBottom: "0.5px solid #111", paddingBottom: 2, display: "grid", gridTemplateColumns: "282px 98px 45px 45px 91px", gap: 0, fontSize: 8, fontWeight: 700 }}>
             <div>Deposited to the account of</div>
             <div>Account number</div>
             <div>Transit</div>
             <div>ABA</div>
             <div style={{ textAlign: "right" }}>Amount</div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr 0.7fr 0.7fr 0.9fr", gap: 12, fontSize: 9, paddingTop: 6 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "282px 98px 45px 45px 91px", gap: 0, fontSize: 8, paddingTop: 4 }}>
             <strong className="calc-val">{joseEmployee}</strong>
             <span className="calc-val">{data.accountNumber || `xxxxx${accountSuffix}`}</span>
             <span className="calc-val">{data.transitNumber || "xxxx"}</span>
             <span className="calc-val">{data.abaNumber || "xxxx"}</span>
             <strong className="calc-val" style={{ textAlign: "right" }}>${money(joseNetPay)}</strong>
           </div>
-          <div style={{ position: "absolute", right: 52, bottom: -54, fontSize: 18, fontWeight: 900 }}>NON-NEGOTIABLE</div>
+          <div style={{ position: "absolute", right: 74, bottom: -78, fontSize: 18, fontWeight: 900 }}>NON-NEGOTIABLE</div>
         </footer>
       </div>
     </div>
