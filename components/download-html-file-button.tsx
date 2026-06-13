@@ -9,9 +9,10 @@ interface Props {
   data: GeneratorPaystubData
   label?: string
   className?: string
+  mode?: "download" | "checkout"
 }
 
-export function DownloadHtmlFileButton({ data, label = "Download HTML", className }: Props) {
+export function DownloadHtmlFileButton({ data, label = "Download HTML", className, mode = "checkout" }: Props) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -32,9 +33,10 @@ export function DownloadHtmlFileButton({ data, label = "Download HTML", classNam
         return
       }
 
-      // Export only the core capture target to avoid preview overlays/watermarks
-      // If using the off-screen snapshot, keep the wrapper but sanitize off-screen styles below.
-      let containerForExport: HTMLElement = chosen
+      // Export only the actual PDF page, not the preview wrapper. The wrapper can
+      // stretch to the browser width and make standalone HTML look wider than A4.
+      let containerForExport: HTMLElement =
+        ((chosen.matches('[data-pdf-page="true"]') ? chosen : chosen.querySelector('[data-pdf-page="true"]')) as HTMLElement | null) || chosen
       // Clone and strip any elements marked as non-export (e.g., buttons)
       const clone = containerForExport.cloneNode(true) as HTMLElement
       // If we cloned the snapshot wrapper, sanitize off-screen styles
@@ -146,21 +148,43 @@ export function DownloadHtmlFileButton({ data, label = "Download HTML", classNam
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${escapeHtml(title)}</title>
   <style>
-    html, body { background:#f0f0f0; margin:0; padding:20px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    @page { size: A4 portrait; margin: 0; }
+    html, body { margin:0; padding:0; min-height:100%; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    body { background:#eeeeee; display:flex; justify-content:center; align-items:flex-start; }
+    .a4-html-page { width:794px; min-height:1123px; background:#fff; margin:0 auto; overflow:hidden; }
     *, *::before, *::after { box-sizing: border-box; }
     img { max-width: 100%; display: block; }
     /* Prevent accidental text selection highlight from affecting appearance */
     ::selection { background: rgba(0,0,0,0.1); }
+    @media print {
+      html, body { width:210mm; height:297mm; background:#fff; display:block; }
+      .a4-html-page { width:210mm !important; height:297mm !important; min-height:297mm !important; margin:0 !important; }
+    }
   </style>
 </head>
 <body>
+<main class="a4-html-page">
 ${htmlFragment}
+</main>
 </body>
 </html>`
 
-      // Instead of immediate download, store in localStorage and redirect to checkout.
       const safeName = (data.employeeName || 'employee').trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '')
       const filename = `${safeName || 'employee'}-PAYSTUB.html`
+      if (mode === "download") {
+        const blob = new Blob([doc], { type: "text/html;charset=utf-8" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        URL.revokeObjectURL(url)
+        return
+      }
+
+      // Store in localStorage and redirect to checkout for the order flow.
       try {
         localStorage.setItem('paystub-html-doc', doc)
         localStorage.setItem('paystub-html-filename', filename)

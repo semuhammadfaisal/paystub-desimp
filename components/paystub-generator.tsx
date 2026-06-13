@@ -468,10 +468,17 @@ export function PaystubGenerator({ user: _user, initialTemplateId }: PaystubGene
           data={paystubData}
           label="Download PDF"
         />
+        <DownloadHtmlFileButton
+          data={paystubData}
+          label="Download HTML"
+          mode="download"
+          className="inline-flex w-full items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 sm:w-auto"
+        />
         <div className="relative group">
           <DownloadHtmlFileButton 
             data={paystubData} 
             label="Complete Order" 
+            mode="checkout"
             className="relative inline-flex w-full items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 sm:w-auto" 
           />
         </div>
